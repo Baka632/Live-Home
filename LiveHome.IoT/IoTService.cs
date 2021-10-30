@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.DHTxx;
+using LiveHome.IoT.Devices;
 using UnitsNet;
 
 namespace LiveHome.IoT
@@ -61,12 +63,21 @@ namespace LiveHome.IoT
             }
         }
 
-        public static bool GetIfCH4Leaked()
+        /// <summary>
+        /// 侦测当前环境是否有可燃气体
+        /// </summary>
+        /// <returns>如果当前环境发现可燃气体,则返回true,否则返回false</returns>
+        public static Task<bool> DetectCombustibleGas()
         {
-            
-#if DEBUG
-            return false;
-#endif
+            return Task.Run(() =>
+            {
+                // HACK: 更改MQ-2传感器的Gpio pin
+                using (MQ2 mq2 = new MQ2(26))
+                {
+                    bool state = mq2.IsCombustibleGasDetected;
+                    return state;
+                }
+            });
         }
     }
 }
