@@ -32,15 +32,16 @@ namespace LiveHome.Server.Controllers
             try
             {
                 (double, double, double) values = await IoTService.GetEnvironmentInfo();
+                if (double.IsNaN(values.Item1) && double.IsNaN(values.Item2) && double.IsNaN(values.Item3))
+                {
+                    return StatusCode(503);
+                }
                 environmentInfo.Temperature = values.Item1;
                 environmentInfo.RelativeHumidity = values.Item2;
                 environmentInfo.HeatIndex = values.Item3;
             }
             catch
             {
-#if DEBUG
-                return new EnvironmentInfo() { Temperature = 114, RelativeHumidity = 514, HeatIndex = 1919810 };
-#endif
                 return StatusCode(503);
             }
             return environmentInfo;
