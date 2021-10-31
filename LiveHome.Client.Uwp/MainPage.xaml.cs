@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -26,7 +27,7 @@ namespace LiveHome.Client.Uwp
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        private Client Client;
+        private Client Client = new Client(null , new HttpClient());
         private double _temperature;
         private double _relativeHumidity;
         private double _heatIndex;
@@ -153,13 +154,13 @@ namespace LiveHome.Client.Uwp
                     return;
                 }
 
-                if (Client == null)
+                if (ServiceUri.StartsWith("http"))
                 {
-                    Client = new Client(ServiceUri, new HttpClient());
+                    Client.BaseUrl = ServiceUri;
                 }
                 else
                 {
-                    Client.BaseUrl = ServiceUri;
+                    Client.BaseUrl = $"http://{ServiceUri}";
                 }
 
                 EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();

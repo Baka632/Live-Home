@@ -14,8 +14,8 @@
   <mp:PhoneIdentity PhoneProductId="0a5bb17e-4c24-484c-b0ab-ee685d96c170" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>LiveHome.Client.Uwp</DisplayName>
-    <PublisherDisplayName>steve</PublisherDisplayName>
+    <DisplayName>Live Home Client</DisplayName>
+    <PublisherDisplayName>Baka632</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -32,10 +32,10 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="LiveHome.Client.Uwp.App">
       <uap:VisualElements
-        DisplayName="LiveHome.Client.Uwp"
+        DisplayName="Live Home Client"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="LiveHome.Client.Uwp"
+        Description="Live Home Client UWP"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
