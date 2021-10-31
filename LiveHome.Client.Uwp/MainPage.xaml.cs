@@ -335,7 +335,7 @@ namespace LiveHome.Client.Uwp
 
         private async void GoToGithub(object sender, RoutedEventArgs e)
         {
-            await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632"));
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632/Live-Home"));
         }
     }
 }
