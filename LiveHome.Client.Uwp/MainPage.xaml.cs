@@ -214,6 +214,7 @@ namespace LiveHome.Client.Uwp
                 {
                     ShowGasWarning();
                 }
+                ShowTile();
             }
             catch (InvalidOperationException)
             {
@@ -336,6 +337,173 @@ namespace LiveHome.Client.Uwp
         private async void GoToGithub(object sender, RoutedEventArgs e)
         {
             await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632/Live-Home"));
+        }
+
+        private void ShowTile()
+        {
+            string combustibleGasConditon;
+            if (IsCombustibleGasDetected)
+            {
+                combustibleGasConditon = "检测到可燃气体!";
+            }
+            else
+            {
+                combustibleGasConditon = "未发现可燃气体";
+            }
+            var tileContent = new TileContent()
+            {
+                Visual = new TileVisual()
+                {
+                    Branding = TileBranding.Name,
+                    TileSmall = new TileBinding()
+                    {
+                        Content = new TileBindingContentAdaptive()
+                        {
+                            TextStacking = TileTextStacking.Center,
+                            Children =
+                {
+                    new AdaptiveText()
+                    {
+                        Text = $"{Temperature}℃",
+                        HintAlign = AdaptiveTextAlign.Center
+                    },
+                    new AdaptiveText()
+                    {
+                        Text = $"{RelativeHumidity}%",
+                        HintAlign = AdaptiveTextAlign.Center
+                    }
+                }
+                        }
+                    },
+                    TileMedium = new TileBinding()
+                    {
+                        Content = new TileBindingContentAdaptive()
+                        {
+                            Children =
+                {
+                    new AdaptiveText()
+                    {
+                        Text = $"{ServiceUri}的环境情况",
+                        HintStyle = AdaptiveTextStyle.Caption
+                    },
+                    new AdaptiveText()
+                    {
+                        Text = $"温度:{Temperature}℃",
+                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                    },
+                    new AdaptiveText()
+                    {
+                        Text = $"湿度:{RelativeHumidity}%",
+                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                    },
+                    new AdaptiveText()
+                    {
+                        Text = $"炎热指数:{HeatIndex}",
+                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                    }
+                }
+                        }
+                    },
+                    TileWide = new TileBinding()
+                    {
+                        Content = new TileBindingContentAdaptive()
+                        {
+                            Children =
+                {
+                    new AdaptiveGroup()
+                    {
+                        Children =
+                        {
+                            new AdaptiveSubgroup()
+                            {
+                                Children =
+                                {
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"{ServiceUri}的环境情况",
+                                        HintStyle = AdaptiveTextStyle.Caption
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"温度:{Temperature}℃",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"湿度:{RelativeHumidity}%",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"炎热指数:{HeatIndex}",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                        }
+                    },
+                    TileLarge = new TileBinding()
+                    {
+                        Content = new TileBindingContentAdaptive()
+                        {
+                            Children =
+                {
+                    new AdaptiveGroup()
+                    {
+                        Children =
+                        {
+                            new AdaptiveSubgroup()
+                            {
+                                Children =
+                                {
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"{ServiceUri}的环境情况",
+                                        HintStyle = AdaptiveTextStyle.Caption
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"温度:{Temperature}℃",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"湿度:{RelativeHumidity}%",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"炎热指数:{HeatIndex}",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = combustibleGasConditon,
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    },
+                                    new AdaptiveText()
+                                    {
+                                        Text = $"最后检查时间:{DateTimeOffset.Now:M}{DateTimeOffset.Now:t}",
+                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                        }
+                    }
+                }
+            };
+
+            // Create the tile notification
+            var tileNotif = new TileNotification(tileContent.GetXml());
+
+            // And send the notification to the primary tile
+            TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotif);
         }
     }
 }
