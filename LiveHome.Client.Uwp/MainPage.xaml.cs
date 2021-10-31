@@ -10,8 +10,10 @@ using System.Text.RegularExpressions;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
@@ -154,14 +156,7 @@ namespace LiveHome.Client.Uwp
                     return;
                 }
 
-                if (ServiceUri.StartsWith("http"))
-                {
-                    Client.BaseUrl = ServiceUri;
-                }
-                else
-                {
-                    Client.BaseUrl = $"http://{ServiceUri}";
-                }
+                Client.BaseUrl = ServiceUri;
 
                 EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();
                 Temperature = envInfo.Temperature;
@@ -169,6 +164,10 @@ namespace LiveHome.Client.Uwp
                 HeatIndex = envInfo.HeatIndex;
                 IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
                 ServiceInfoControlVisibility = Visibility.Visible;
+                if (IsCombustibleGasDetected)
+                {
+                    ShowGasWarning();
+                }
             }
             catch (InvalidOperationException)
             {
@@ -195,6 +194,40 @@ namespace LiveHome.Client.Uwp
                 IsServiceControlEnabled = true;
                 IsGettingInfo = false;
             }
+        }
+
+        private void ShowGasWarning()
+        {
+            ToastContent toastContent = new ToastContent()
+            {
+                Visual = new ToastVisual()
+                {
+                    BindingGeneric = new ToastBindingGeneric()
+                    {
+                        Children =
+                        {
+                            new AdaptiveText()
+                            {
+                                Text = "侦测到可燃气体"
+                            },
+                            new AdaptiveText()
+                            {
+                                Text = "请立即采取措施"
+                            }
+                        },
+                        Attribution = new ToastGenericAttributionText()
+                        {
+                            Text = ServiceUri
+                        }
+                    }
+                }
+            };
+
+            // Create the toast notification
+            ToastNotification toastNotif = new ToastNotification(toastContent.GetXml());
+
+            // And send the notification
+            ToastNotificationManager.CreateToastNotifier().Show(toastNotif);
         }
 
         private void ShowInfoBar(string title, string message, InfoBarSeverity severity)

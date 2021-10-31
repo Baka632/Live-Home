@@ -44,7 +44,7 @@
                     <TextBox
                         MinWidth="400"
                         d:Text="https://service.livestudio.com/sensor"
-                        Header="服务地址"
+                        Header="服务地址(请填写完整名称)"
                         IsEnabled="{x:Bind IsServiceControlEnabled, Mode=OneWay}"
                         Text="{x:Bind ServiceUri, Mode=TwoWay}" />
                 </StackPanel>
