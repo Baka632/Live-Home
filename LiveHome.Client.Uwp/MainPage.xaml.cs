@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml.Controls;
@@ -35,6 +36,9 @@ namespace LiveHome.Client.Uwp
         private bool _isInfoBarOpen;
         private string _infoBarMessage;
         private InfoBarSeverity _infoBarSeverity;
+        private bool _isServiceControlEnabled = true;
+        private Visibility _serviceInfoControlVisibility = Visibility.Collapsed;
+        private bool _isGettingInfo;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -102,17 +106,60 @@ namespace LiveHome.Client.Uwp
             }
         }
 
+        public bool IsServiceControlEnabled
+        {
+            get => _isServiceControlEnabled;
+            set
+            {
+                _isServiceControlEnabled = value;
+                OnPropertiesChanged();
+            }
+        }
+
+        public bool IsGettingInfo
+        {
+            get => _isGettingInfo;
+            set
+            {
+                _isGettingInfo = value;
+                OnPropertiesChanged();
+            }
+        }
+
+        public Visibility ServiceInfoControlVisibility
+        {
+            get => _serviceInfoControlVisibility;
+            set
+            {
+                _serviceInfoControlVisibility = value;
+                OnPropertiesChanged();
+            }
+        }
+
         private async void Update(object sender, RoutedEventArgs e)
         {
             try
             {
+                IsGettingInfo = true;
+                IsServiceControlEnabled = false;
+                if (IsInfoBarOpen)
+                {
+                    IsInfoBarOpen = false;
+                }
+
+                if (string.IsNullOrEmpty(ServiceUri))
+                {
+                    ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Warning);
+                    return;
+                }
+
                 if (Client == null)
                 {
-                    if (string.IsNullOrEmpty(ServiceUri))
-                    {
-                        return;
-                    }
-                    Client = new Client(ServiceUri, new System.Net.Http.HttpClient());
+                    Client = new Client(ServiceUri, new HttpClient());
+                }
+                else
+                {
+                    Client.BaseUrl = ServiceUri;
                 }
 
                 EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();
@@ -120,14 +167,32 @@ namespace LiveHome.Client.Uwp
                 RelativeHumidity = envInfo.RelativeHumidity;
                 HeatIndex = envInfo.HeatIndex;
                 IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
+                ServiceInfoControlVisibility = Visibility.Visible;
             }
             catch (InvalidOperationException)
             {
                 ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Error);
+                ServiceInfoControlVisibility = Visibility.Collapsed;
+            }
+            catch (ApiException ex)
+            {
+                ShowInfoBar("无效的服务器响应", $"请检查是否输入本服务的地址。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
+                ServiceInfoControlVisibility = Visibility.Collapsed;
+            }
+            catch (HttpRequestException ex)
+            {
+                ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
+                ServiceInfoControlVisibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
                 ShowInfoBar("未知错误", $"详细信息:\n{ex.Message}", InfoBarSeverity.Error);
+                ServiceInfoControlVisibility = Visibility.Collapsed;
+            }
+            finally
+            {
+                IsServiceControlEnabled = true;
+                IsGettingInfo = false;
             }
         }
 
@@ -136,7 +201,10 @@ namespace LiveHome.Client.Uwp
             InfoBarTitle = title;
             InfoBarMessage = message;
             InfoBarSeverity = severity;
-            IsInfoBarOpen = true;
+            if (IsInfoBarOpen != true)
+            {
+                IsInfoBarOpen = true;
+            }
         }
 
         public string InfoBarTitle

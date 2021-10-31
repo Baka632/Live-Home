@@ -39,39 +39,49 @@
                         <Setter Property="FontSize" Value="20" />
                     </Style>
                 </StackPanel.Resources>
+
                 <StackPanel Margin="0,0,0,20">
                     <TextBox
                         MinWidth="400"
                         d:Text="https://service.livestudio.com/sensor"
                         Header="服务地址"
+                        IsEnabled="{x:Bind IsServiceControlEnabled, Mode=OneWay}"
                         Text="{x:Bind ServiceUri, Mode=TwoWay}" />
                 </StackPanel>
-                <TextBlock>
+
+                <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
                     <Run Text="温度:" />
                     <Run d:Text="114514" Text="{x:Bind Temperature, Mode=OneWay}" />
                     <Run Text="℃" />
                 </TextBlock>
-                <TextBlock>
+                <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
                     <Run Text="湿度:" />
                     <Run d:Text="81.0" Text="{x:Bind RelativeHumidity, Mode=OneWay}" />
                     <Run Text="%" />
                 </TextBlock>
-                <TextBlock>
+                <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
                     <Run Text="炎热指数:" />
                     <Run d:Text="1919" Text="{x:Bind HeatIndex, Mode=OneWay}" />
                 </TextBlock>
-                <TextBlock>
+                <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
                     <Run Text="设备附近是否有可燃气体:" />
                     <Run d:Text="是" Text="{x:Bind IsCombustibleGasDetected, Converter={StaticResource BoolToText}, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
 
-            <Button Margin="0,10,0,0" Click="Update" FontSize="20">
-                <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE117;" />
-                    <TextBlock Margin="10,0,0,0" Text="更新信息" />
-                </StackPanel>
-            </Button>
+            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                <Button
+                    Margin="0,0,10,0"
+                    Click="Update"
+                    FontSize="20"
+                    IsEnabled="{x:Bind IsServiceControlEnabled, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE117;" />
+                        <TextBlock Margin="10,0,0,0" Text="更新信息" />
+                    </StackPanel>
+                </Button>
+                <muxc:ProgressRing IsActive="{x:Bind IsGettingInfo, Mode=OneWay}" />
+            </StackPanel>
         </StackPanel>
 
         <muxc:InfoBar
