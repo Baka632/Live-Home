@@ -19,6 +19,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Threading.Tasks;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -29,7 +30,7 @@ namespace LiveHome.Client.Uwp
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        private Client Client = new Client(null , new HttpClient());
+        private Client Client = new Client(null, new HttpClient());
         private double _temperature;
         private double _relativeHumidity;
         private double _heatIndex;
@@ -42,12 +43,25 @@ namespace LiveHome.Client.Uwp
         private bool _isServiceControlEnabled = true;
         private Visibility _serviceInfoControlVisibility = Visibility.Collapsed;
         private bool _isGettingInfo;
+        private DateTimeOffset _lastCheckTime;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private DispatcherTimer timer = new DispatcherTimer();
+        private bool _isTimerEnabled;
 
         public MainPage()
         {
             this.InitializeComponent();
+            timer.Interval = new TimeSpan(0, 0, 30);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+            _isTimerEnabled = timer.IsEnabled;
+        }
+
+        private async void Timer_Tick(object sender, object e)
+        {
+            await UpdateInfo();
         }
 
         /// <summary>
@@ -57,6 +71,34 @@ namespace LiveHome.Client.Uwp
         public void OnPropertiesChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public bool IsTimerEnabled
+        {
+            get => _isTimerEnabled;
+            set
+            {
+                _isTimerEnabled = value;
+                if (value)
+                {
+                    timer.Start();
+                }
+                else
+                {
+                    timer.Stop();
+                }
+                OnPropertiesChanged();
+            }
+        }
+
+        public DateTimeOffset LastCheckTime
+        {
+            get => _lastCheckTime;
+            set
+            {
+                _lastCheckTime = value;
+                OnPropertiesChanged();
+            }
         }
 
         public double Temperature
@@ -69,7 +111,7 @@ namespace LiveHome.Client.Uwp
             }
         }
 
-        public double RelativeHumidity 
+        public double RelativeHumidity
         {
             get => _relativeHumidity;
             set
@@ -139,7 +181,12 @@ namespace LiveHome.Client.Uwp
             }
         }
 
-        private async void Update(object sender, RoutedEventArgs e)
+        private async void UpdateEnvInfo(object sender, RoutedEventArgs e)
+        {
+            await UpdateInfo();
+        }
+
+        private async Task UpdateInfo()
         {
             try
             {
@@ -191,6 +238,7 @@ namespace LiveHome.Client.Uwp
             }
             finally
             {
+                LastCheckTime = DateTimeOffset.Now;
                 IsServiceControlEnabled = true;
                 IsGettingInfo = false;
             }
