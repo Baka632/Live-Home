@@ -55,7 +55,6 @@ namespace LiveHome.Client.Uwp
             this.InitializeComponent();
             timer.Interval = new TimeSpan(0, 0, 30);
             timer.Tick += Timer_Tick;
-            timer.Start();
             _isTimerEnabled = timer.IsEnabled;
         }
 
@@ -327,6 +326,16 @@ namespace LiveHome.Client.Uwp
                 _infoBarSeverity = value;
                 OnPropertiesChanged();
             }
+        }
+
+        private async void MailTo(object sender, RoutedEventArgs e)
+        {
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("mailto:stevemc123456@outlook.com"));
+        }
+
+        private async void GoToGithub(object sender, RoutedEventArgs e)
+        {
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632"));
         }
     }
 }
