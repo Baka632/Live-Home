@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Threading.Tasks;
+using LiveHome.Client.Uwp.WebApi;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -30,10 +31,9 @@ namespace LiveHome.Client.Uwp
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        private Client Client = new Client(null, new HttpClient());
+        private WebApiClient Client = new WebApiClient(null, new HttpClient());
         private double _temperature;
         private double _relativeHumidity;
-        private double _heatIndex;
         private bool _isCombustibleGasDetected;
         private string _serviceUri;
         private string _infoBarTitle;
@@ -60,6 +60,10 @@ namespace LiveHome.Client.Uwp
 
         private async void Timer_Tick(object sender, object e)
         {
+            if (IsGettingInfo)
+            {
+                return;
+            }
             await UpdateInfo();
         }
 
@@ -120,16 +124,6 @@ namespace LiveHome.Client.Uwp
             }
         }
 
-        public double HeatIndex
-        {
-            get => _heatIndex;
-            set
-            {
-                _heatIndex = value;
-                OnPropertiesChanged();
-            }
-        }
-
         public bool IsCombustibleGasDetected
         {
             get => _isCombustibleGasDetected;
@@ -182,6 +176,10 @@ namespace LiveHome.Client.Uwp
 
         private async void UpdateEnvInfo(object sender, RoutedEventArgs e)
         {
+            if (IsGettingInfo)
+            {
+                return;
+            }
             await UpdateInfo();
         }
 
@@ -204,11 +202,10 @@ namespace LiveHome.Client.Uwp
 
                 Client.BaseUrl = ServiceUri;
 
+                IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
                 EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();
                 Temperature = envInfo.Temperature;
                 RelativeHumidity = envInfo.RelativeHumidity;
-                HeatIndex = envInfo.HeatIndex;
-                IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
                 ServiceInfoControlVisibility = Visibility.Visible;
                 if (IsCombustibleGasDetected)
                 {
@@ -331,12 +328,12 @@ namespace LiveHome.Client.Uwp
 
         private async void MailTo(object sender, RoutedEventArgs e)
         {
-            await Windows.System.Launcher.LaunchUriAsync(new Uri("mailto:stevemc123456@outlook.com"));
+            _ = await Windows.System.Launcher.LaunchUriAsync(new Uri("mailto:stevemc123456@outlook.com"));
         }
 
         private async void GoToGithub(object sender, RoutedEventArgs e)
         {
-            await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632/Live-Home"));
+            _ = await Windows.System.Launcher.LaunchUriAsync(new Uri("https://github.com/Baka632/Live-Home"));
         }
 
         private void ShowTile()
@@ -395,11 +392,6 @@ namespace LiveHome.Client.Uwp
                     {
                         Text = $"湿度:{RelativeHumidity}%",
                         HintStyle = AdaptiveTextStyle.CaptionSubtle
-                    },
-                    new AdaptiveText()
-                    {
-                        Text = $"炎热指数:{HeatIndex}",
-                        HintStyle = AdaptiveTextStyle.CaptionSubtle
                     }
                 }
                         }
@@ -435,7 +427,7 @@ namespace LiveHome.Client.Uwp
                                     },
                                     new AdaptiveText()
                                     {
-                                        Text = $"炎热指数:{HeatIndex}",
+                                        Text = combustibleGasConditon,
                                         HintStyle = AdaptiveTextStyle.CaptionSubtle
                                     }
                                 }
@@ -472,11 +464,6 @@ namespace LiveHome.Client.Uwp
                                     new AdaptiveText()
                                     {
                                         Text = $"湿度:{RelativeHumidity}%",
-                                        HintStyle = AdaptiveTextStyle.CaptionSubtle
-                                    },
-                                    new AdaptiveText()
-                                    {
-                                        Text = $"炎热指数:{HeatIndex}",
                                         HintStyle = AdaptiveTextStyle.CaptionSubtle
                                     },
                                     new AdaptiveText()

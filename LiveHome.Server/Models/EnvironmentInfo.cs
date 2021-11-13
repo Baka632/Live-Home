@@ -15,9 +15,5 @@ namespace LiveHome.Server.Models
         /// 相对湿度
         /// </summary>
         public double RelativeHumidity { get; set; }
-        /// <summary>
-        /// 炎热指数
-        /// </summary>
-        public double HeatIndex { get; set; }
     }
 }

@@ -123,7 +123,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="OpenAPIs\swagger1.cs" />
+    <Compile Include="OpenAPIs\swagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -179,12 +179,6 @@
     <Content Include="Assets\Wide310x150Logo.scale-125.png" />
     <Content Include="Assets\Wide310x150Logo.scale-150.png" />
     <Content Include="Assets\Wide310x150Logo.scale-400.png" />
-    <Content Include="OpenAPIs\index.html">
-      <Namespace>LiveHome.Client.Uwp.WebApi</Namespace>
-      <ClassName>LiveHomeApi</ClassName>
-      <CodeGenerator>NSwagCSharp</CodeGenerator>
-      <SourceUri>https://localhost:44320/swagger/index.html</SourceUri>
-    </Content>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -219,12 +213,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenAPIs\swagger.json">
-      <Namespace>LiveHome.Client.Uwp.WebAPI</Namespace>
-      <ClassName>LiveHomeWebAPI</ClassName>
-      <CodeGenerator>NSwagCSharp</CodeGenerator>
-      <SourceUri>https://localhost:44320/swagger/v1/swagger.json</SourceUri>
-    </None>
-    <None Include="OpenAPIs\swagger1.json">
+      <Namespace>LiveHome.Client.Uwp.WebApi</Namespace>
+      <ClassName>WebApiClient</ClassName>
       <CodeGenerator>NSwagCSharp</CodeGenerator>
       <SourceUri>https://localhost:44320/swagger/v1/swagger.json</SourceUri>
     </None>

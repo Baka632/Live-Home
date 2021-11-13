@@ -12,13 +12,13 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <Style TargetType="Image" x:Key="GithubImage">
-                        <Setter Property="Source" Value="/Assets/GitHub-Mark-32px.png"/>
+                    <Style x:Key="GithubImage" TargetType="Image">
+                        <Setter Property="Source" Value="/Assets/GitHub-Mark-32px.png" />
                     </Style>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <Style TargetType="Image" x:Key="GithubImage">
-                        <Setter Property="Source" Value="/Assets/Github-Mark-Light-32px.png"/>
+                    <Style x:Key="GithubImage" TargetType="Image">
+                        <Setter Property="Source" Value="/Assets/Github-Mark-Light-32px.png" />
                     </Style>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
@@ -58,7 +58,7 @@
                     <TextBox
                         MinWidth="400"
                         d:Text="https://service.livestudio.com/sensor"
-                        Header="服务地址(请填写完整名称)"
+                        Header="服务地址(地址需包含http://或https://前缀)"
                         IsEnabled="{x:Bind IsServiceControlEnabled, Mode=OneWay}"
                         Text="{x:Bind ServiceUri, Mode=TwoWay}" />
                 </StackPanel>
@@ -72,10 +72,6 @@
                     <Run Text="湿度:" />
                     <Run d:Text="81.0" Text="{x:Bind RelativeHumidity, Mode=OneWay}" />
                     <Run Text="%" />
-                </TextBlock>
-                <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
-                    <Run Text="炎热指数:" />
-                    <Run d:Text="1919" Text="{x:Bind HeatIndex, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Visibility="{x:Bind ServiceInfoControlVisibility, Mode=OneWay}">
                     <Run Text="设备附近是否有可燃气体:" />
@@ -99,7 +95,7 @@
                 </Button>
                 <muxc:ProgressRing IsActive="{x:Bind IsGettingInfo, Mode=OneWay}" />
             </StackPanel>
-            <CheckBox Content="自动更新(每半分钟更新一次)" />
+            <CheckBox Content="自动更新(每半分钟更新一次)" IsChecked="{x:Bind IsTimerEnabled, Mode=TwoWay}" IsEnabled="{x:Bind IsServiceControlEnabled, Mode=OneWay}" />
         </StackPanel>
 
         <muxc:InfoBar
@@ -114,9 +110,9 @@
             Severity="{x:Bind InfoBarSeverity, Mode=OneWay}" />
 
         <Button
-            Padding="0"
             Width="35"
             Height="35"
+            Padding="0"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Background="Transparent"
@@ -132,10 +128,10 @@
                         <TextBlock Text="版本 1.0.0.0" />
                         <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                             <Button
-                                Padding="0"
                                 Width="40"
                                 Height="40"
                                 Margin="0,0,5,0"
+                                Padding="0"
                                 Background="Transparent"
                                 Click="MailTo"
                                 Content="&#xE119;"
@@ -144,9 +140,9 @@
                                 FontSize="20"
                                 ToolTipService.ToolTip="邮箱" />
                             <Button
-                                Padding="0"
                                 Width="40"
                                 Height="40"
+                                Padding="0"
                                 Background="Transparent"
                                 Click="GoToGithub"
                                 CornerRadius="1"

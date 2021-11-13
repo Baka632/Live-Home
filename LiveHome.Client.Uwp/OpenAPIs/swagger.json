@@ -76,10 +76,6 @@
           "relativeHumidity": {
             "type": "number",
             "format": "double"
-          },
-          "heatIndex": {
-            "type": "number",
-            "format": "double"
           }
         },
         "additionalProperties": false

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using LiveHome.IoT;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,9 +27,6 @@ namespace LiveHome.Server.Controllers
             }
             catch
             {
-#if DEBUG
-                return true;
-#endif
                 return StatusCode(503);
             }
         }
