@@ -1,24 +1,80 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="LiveHome.Client.Mobile.MainPage">
-
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:mobile="clr-namespace:LiveHome.Client.Mobile"
+             x:Class="LiveHome.Client.Mobile.MainPage"
+             x:DataType="mobile:MainPage">
+    <ContentPage.Resources>
+        <mobile:BoolToText x:Key="BoolToText" />
+    </ContentPage.Resources>
     <StackLayout>
-        <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
-            <Label Text="Welcome to Xamarin.Forms!" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
-        </Frame>
-        <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
-        <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
-        <Label FontSize="16" Padding="30,24,30,0">
-            <Label.FormattedText>
-                <FormattedString>
-                    <FormattedString.Spans>
-                        <Span Text="Learn more at "/>
-                        <Span Text="https://aka.ms/xamarin-quickstart" FontAttributes="Bold"/>
-                    </FormattedString.Spans>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
+        <Label Text="Live Home Client - Xamarin" HorizontalTextAlignment="Center" FontSize="30"/>
+        <StackLayout HorizontalOptions="Center">
+            <StackLayout>
+                <StackLayout.Resources>
+                    <Style TargetType="Editor">
+                        <Setter Property="FontSize" Value="20" />
+                    </Style>
+                </StackLayout.Resources>
+
+                <StackLayout Margin="0,0,0,20">
+                    <Label>
+                        服务地址(地址需包含http://或https://前缀)
+                    </Label>
+                    <Editor
+                        MinimumHeightRequest="400"
+                        IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}"
+                        Text="{Binding ServiceUri, Mode=TwoWay}" />
+                </StackLayout>
+
+                <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="温度:" />
+                            <Span Text="{Binding Temperature, Mode=OneWay}" />
+                            <Span Text="℃" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="湿度:" />
+                            <Span Text="{Binding RelativeHumidity, Mode=OneWay}" />
+                            <Span Text="%" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="设备附近是否有可燃气体:" />
+                            <Span Text="{Binding IsCombustibleGasDetected, Converter={StaticResource BoolToText}, Mode=OneWay}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </StackLayout>
+            <Label Margin="0,10,0,0">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="上次检查时间" />
+                        <Span Text="{Binding LastCheckTime, Mode=OneWay}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <StackLayout Margin="0,10,0,0" Orientation="Horizontal">
+                <Button
+                    Margin="0,0,10,0"
+                    Clicked="UpdateEnvInfo"
+                    FontSize="20"
+                    Text="更新信息"
+                    IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}">
+                </Button>
+            </StackLayout>
+            <StackLayout Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding IsTimerEnabled, Mode=TwoWay}" IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}" />
+                <Label Text="自动更新(每半分钟更新一次)"/>
+            </StackLayout>
+        </StackLayout>
     </StackLayout>
 
 </ContentPage>
