@@ -23,14 +23,14 @@
                     <Editor
                         MinimumHeightRequest="400"
                         IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}"
-                        Text="{Binding ServiceUri, Mode=TwoWay}" />
+                        TextChanged="ServiceUriChanged" />
                 </StackLayout>
 
                 <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="温度:" />
-                            <Span Text="{Binding Temperature, Mode=OneWay}" />
+                            <Span x:Name="tempLable" />
                             <Span Text="℃" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -39,7 +39,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="湿度:" />
-                            <Span Text="{Binding RelativeHumidity, Mode=OneWay}" />
+                            <Span x:Name="rhLable" />
                             <Span Text="%" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -48,7 +48,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="设备附近是否有可燃气体:" />
-                            <Span Text="{Binding IsCombustibleGasDetected, Converter={StaticResource BoolToText}, Mode=OneWay}" />
+                            <Span x:Name="gasLabel" />
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
@@ -57,7 +57,7 @@
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="上次检查时间" />
-                        <Span Text="{Binding LastCheckTime, Mode=OneWay}" />
+                        <Span x:Name="lastCheckTimeLable" />
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
@@ -71,8 +71,8 @@
                 </Button>
             </StackLayout>
             <StackLayout Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding IsTimerEnabled, Mode=TwoWay}" IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}" />
-                <Label Text="自动更新(每半分钟更新一次)"/>
+                <CheckBox HorizontalOptions="Center" VerticalOptions="Center" CheckedChanged="OnCheckedChanged" />
+                <Label HorizontalOptions="Center" VerticalOptions="Center" Text="自动更新(每半分钟更新一次)"/>
             </StackLayout>
         </StackLayout>
     </StackLayout>

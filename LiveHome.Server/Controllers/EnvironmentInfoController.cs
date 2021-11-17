@@ -40,6 +40,9 @@ namespace LiveHome.Server.Controllers
             }
             catch
             {
+#if DEBUG
+                return new EnvironmentInfo() { Temperature = 11451.4, RelativeHumidity = 81.0 };
+#endif
                 return StatusCode(503);
             }
             return environmentInfo;

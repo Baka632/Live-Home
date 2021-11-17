@@ -27,6 +27,9 @@ namespace LiveHome.Server.Controllers
             }
             catch
             {
+#if DEBUG
+                return false;
+#endif
                 return StatusCode(503);
             }
         }

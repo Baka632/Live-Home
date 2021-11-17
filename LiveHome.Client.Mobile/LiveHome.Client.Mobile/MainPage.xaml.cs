@@ -11,14 +11,33 @@ using Xamarin.Forms;
 
 namespace LiveHome.Client.Mobile
 {
-    public partial class MainPage : ContentPage
+    public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
-        private WebApiClient Client = new WebApiClient(null, new HttpClient());
+        private readonly WebApiClient Client = new WebApiClient(null, new HttpClient());
+        private bool _isTimerEnabled;
+        private DateTimeOffset _lastCheckTime;
+        private double _temperature;
+        private double _relativeHumidity;
+        private bool _isCombustibleGasDetected;
+        private string _serviceUri;
+        private bool _isServiceControlEnabled;
+        private bool _isGettingInfo;
+        private bool _serviceInfoControlVisibility;
+
+        public new event PropertyChangedEventHandler PropertyChanged;
 
         public MainPage()
         {
             this.InitializeComponent();
-            Device.StartTimer(new TimeSpan(0, 0, 30), () => Timer_Tick());
+        }
+
+        /// <summary>
+        /// 通知系统属性已经发生更改
+        /// </summary>
+        /// <param name="propertyName">发生更改的属性名称,其填充是自动完成的</param>
+        public void OnPropertiesChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private bool Timer_Tick()
@@ -31,84 +50,179 @@ namespace LiveHome.Client.Mobile
             return IsTimerEnabled;
         }
 
-        public static readonly BindableProperty _IsTimerEnabled =
-            BindableProperty.Create("IsTimerEnabled", typeof(bool), typeof(MainPage), false);
+        //public static readonly BindableProperty _IsTimerEnabled =
+        //    BindableProperty.Create("IsTimerEnabled", typeof(bool), typeof(MainPage), false);
+
+        //public bool IsTimerEnabled
+        //{
+        //    get => (bool)GetValue(_IsTimerEnabled);
+        //    set => SetValue(_IsTimerEnabled, value);
+        //}
+
+        //public static readonly BindableProperty _LastCheckTime =
+        //    BindableProperty.Create("LastCheckTime", typeof(DateTimeOffset), typeof(MainPage), DateTimeOffset.Now);
+
+        //public DateTimeOffset LastCheckTime
+        //{
+        //    get => (DateTimeOffset)GetValue(_LastCheckTime);
+        //    set => SetValue(_LastCheckTime, value);
+        //}
+
+        //public static readonly BindableProperty _Temperature =
+        //    BindableProperty.Create("Temperature", typeof(double), typeof(MainPage), 0d);
+        //public double Temperature
+        //{
+        //    get => (double)GetValue(_Temperature);
+        //    set => SetValue(_Temperature, value);
+        //}
+
+        //public static readonly BindableProperty _RelativeHumidity =
+        //    BindableProperty.Create("RelativeHumidity", typeof(double), typeof(MainPage), 0d);
+        //public double RelativeHumidity
+        //{
+        //    get => (double)GetValue(_RelativeHumidity);
+        //    set => SetValue(_RelativeHumidity, value);
+        //}
+
+        //public static readonly BindableProperty _IsCombustibleGasDetected =
+        //    BindableProperty.Create("IsCombustibleGasDetected", typeof(bool), typeof(MainPage), false);
+
+        //public bool IsCombustibleGasDetected
+        //{
+        //    get => (bool)GetValue(_IsCombustibleGasDetected);
+        //    set => SetValue(_IsCombustibleGasDetected, value);
+        //}
+
+        //public static readonly BindableProperty _ServiceUri =
+        //    BindableProperty.Create("ServiceUri", typeof(string), typeof(MainPage), "");
+
+        //public string ServiceUri
+        //{
+        //    get => (string)GetValue(_ServiceUri);
+        //    set => SetValue(_ServiceUri, value);
+        //}
+
+        //public static readonly BindableProperty _IsServiceControlEnabled =
+        //    BindableProperty.Create("IsServiceControlEnabled", typeof(bool), typeof(MainPage), true);
+
+        //public bool IsServiceControlEnabled
+        //{
+        //    get => (bool)GetValue(_IsServiceControlEnabled);
+        //    set => SetValue(_IsServiceControlEnabled, value);
+        //}
+
+        //public static readonly BindableProperty _IsGettingInfo =
+        //    BindableProperty.Create("IsGettingInfo", typeof(bool), typeof(MainPage), false);
+
+        //public bool IsGettingInfo
+        //{
+        //    get => (bool)GetValue(_IsGettingInfo);
+        //    set => SetValue(_IsGettingInfo, value);
+        //}
+
+        //public static readonly BindableProperty _ServiceInfoControlVisibility =
+        //    BindableProperty.Create("ServiceInfoControlVisibility", typeof(bool), typeof(MainPage), false);
+
+        //public bool ServiceInfoControlVisibility
+        //{
+        //    get => (bool)GetValue(_ServiceInfoControlVisibility);
+        //    set => SetValue(_ServiceInfoControlVisibility, value);
+        //}
 
         public bool IsTimerEnabled
         {
-            get => (bool)GetValue(_IsTimerEnabled);
-            set => SetValue(_IsTimerEnabled, value);
+            get => _isTimerEnabled;
+            set
+            {
+                _isTimerEnabled = value;
+                if (value)
+                {
+                    Device.StartTimer(new TimeSpan(0, 0, 30), () => Timer_Tick());
+                }
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _LastCheckTime =
-            BindableProperty.Create("LastCheckTime", typeof(DateTimeOffset), typeof(MainPage), DateTimeOffset.Now);
 
         public DateTimeOffset LastCheckTime
         {
-            get => (DateTimeOffset)GetValue(_LastCheckTime);
-            set => SetValue(_LastCheckTime, value);
+            get => _lastCheckTime;
+            set
+            {
+                _lastCheckTime = value;
+                OnPropertiesChanged();
+            }
         }
 
-        public static readonly BindableProperty _Temperature =
-            BindableProperty.Create("Temperature", typeof(double), typeof(MainPage), 0d);
         public double Temperature
         {
-            get => (double)GetValue(_Temperature);
-            set => SetValue(_Temperature, value);
+            get => _temperature;
+            set
+            {
+                _temperature = value;
+                OnPropertiesChanged();
+            }
         }
 
-        public static readonly BindableProperty _RelativeHumidity =
-            BindableProperty.Create("RelativeHumidity", typeof(double), typeof(MainPage), 0d);
         public double RelativeHumidity
         {
-            get => (double)GetValue(_RelativeHumidity);
-            set => SetValue(_RelativeHumidity, value);
+            get => _relativeHumidity;
+            set
+            {
+                _relativeHumidity = value;
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _IsCombustibleGasDetected =
-            BindableProperty.Create("IsCombustibleGasDetected", typeof(bool), typeof(MainPage), false);
 
         public bool IsCombustibleGasDetected
         {
-            get => (bool)GetValue(_IsCombustibleGasDetected);
-            set => SetValue(_IsCombustibleGasDetected, value);
+            get => _isCombustibleGasDetected;
+            set
+            {
+                _isCombustibleGasDetected = value;
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _ServiceUri =
-            BindableProperty.Create("ServiceUri", typeof(string), typeof(MainPage), "");
 
         public string ServiceUri
         {
-            get => (string)GetValue(_ServiceUri);
-            set => SetValue(_ServiceUri, value);
+            get => _serviceUri;
+            set
+            {
+                _serviceUri = value;
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _IsServiceControlEnabled =
-            BindableProperty.Create("IsServiceControlEnabled", typeof(bool), typeof(MainPage), true);
 
         public bool IsServiceControlEnabled
         {
-            get => (bool)GetValue(_IsServiceControlEnabled);
-            set => SetValue(_IsServiceControlEnabled, value);
+            get => _isServiceControlEnabled;
+            set
+            {
+                _isServiceControlEnabled = value;
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _IsGettingInfo =
-            BindableProperty.Create("IsGettingInfo", typeof(bool), typeof(MainPage), false);
 
         public bool IsGettingInfo
         {
-            get => (bool)GetValue(_IsGettingInfo);
-            set => SetValue(_IsGettingInfo, value);
+            get => _isGettingInfo;
+            set
+            {
+                _isGettingInfo = value;
+                OnPropertiesChanged();
+            }
         }
-
-        public static readonly BindableProperty _ServiceInfoControlVisibility =
-            BindableProperty.Create("ServiceInfoControlVisibility", typeof(bool), typeof(MainPage), false);
 
         public bool ServiceInfoControlVisibility
         {
-            get => (bool)GetValue(_ServiceInfoControlVisibility);
-            set => SetValue(_ServiceInfoControlVisibility, value);
+            get => _serviceInfoControlVisibility;
+            set
+            {
+                _serviceInfoControlVisibility = value;
+                OnPropertiesChanged();
+            }
         }
+
 
         private async void UpdateEnvInfo(object sender, EventArgs e)
         {
@@ -134,9 +248,13 @@ namespace LiveHome.Client.Mobile
                 Client.BaseUrl = ServiceUri;
 
                 IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
+                gasLabel.Text = IsCombustibleGasDetected ? "是" : "否";
                 EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();
                 Temperature = envInfo.Temperature;
+                tempLable.Text = envInfo.Temperature.ToString("0.#");
                 RelativeHumidity = envInfo.RelativeHumidity;
+                rhLable.Text = envInfo.RelativeHumidity.ToString();
+                lastCheckTimeLable.Text = DateTimeOffset.Now.ToString();
                 if (IsCombustibleGasDetected)
                 {
                     ShowGasWarning();
@@ -172,12 +290,22 @@ namespace LiveHome.Client.Mobile
 
         private void ShowInfoBar(string v1, string v2)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         private void ShowGasWarning()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+        }
+
+        private void ServiceUriChanged(object sender, TextChangedEventArgs e)
+        {
+            ServiceUri = e.NewTextValue;
+        }
+
+        private void OnCheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            IsTimerEnabled = e.Value;
         }
     }
 }
