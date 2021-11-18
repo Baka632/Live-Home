@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using LiveHome.Client.Mobile.WebApi;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace LiveHome.Client.Mobile
@@ -46,7 +47,11 @@ namespace LiveHome.Client.Mobile
             {
                 return true;
             }
-            UpdateInfo();
+            Task task = new Task(async () =>
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () => await UpdateInfo());
+            });
+            task.Start();
             return IsTimerEnabled;
         }
 
@@ -288,9 +293,9 @@ namespace LiveHome.Client.Mobile
             }
         }
 
-        private void ShowInfoBar(string v1, string v2)
+        private async void ShowInfoBar(string title, string message)
         {
-            //throw new NotImplementedException();
+            await DisplayAlert(title, message, "了解");
         }
 
         private void ShowGasWarning()
