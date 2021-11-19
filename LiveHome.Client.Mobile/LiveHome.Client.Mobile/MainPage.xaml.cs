@@ -6,6 +6,9 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Android;
+using Android.App;
+using Android.OS;
 using LiveHome.Client.Mobile.WebApi;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -55,84 +58,6 @@ namespace LiveHome.Client.Mobile
             return IsTimerEnabled;
         }
 
-        //public static readonly BindableProperty _IsTimerEnabled =
-        //    BindableProperty.Create("IsTimerEnabled", typeof(bool), typeof(MainPage), false);
-
-        //public bool IsTimerEnabled
-        //{
-        //    get => (bool)GetValue(_IsTimerEnabled);
-        //    set => SetValue(_IsTimerEnabled, value);
-        //}
-
-        //public static readonly BindableProperty _LastCheckTime =
-        //    BindableProperty.Create("LastCheckTime", typeof(DateTimeOffset), typeof(MainPage), DateTimeOffset.Now);
-
-        //public DateTimeOffset LastCheckTime
-        //{
-        //    get => (DateTimeOffset)GetValue(_LastCheckTime);
-        //    set => SetValue(_LastCheckTime, value);
-        //}
-
-        //public static readonly BindableProperty _Temperature =
-        //    BindableProperty.Create("Temperature", typeof(double), typeof(MainPage), 0d);
-        //public double Temperature
-        //{
-        //    get => (double)GetValue(_Temperature);
-        //    set => SetValue(_Temperature, value);
-        //}
-
-        //public static readonly BindableProperty _RelativeHumidity =
-        //    BindableProperty.Create("RelativeHumidity", typeof(double), typeof(MainPage), 0d);
-        //public double RelativeHumidity
-        //{
-        //    get => (double)GetValue(_RelativeHumidity);
-        //    set => SetValue(_RelativeHumidity, value);
-        //}
-
-        //public static readonly BindableProperty _IsCombustibleGasDetected =
-        //    BindableProperty.Create("IsCombustibleGasDetected", typeof(bool), typeof(MainPage), false);
-
-        //public bool IsCombustibleGasDetected
-        //{
-        //    get => (bool)GetValue(_IsCombustibleGasDetected);
-        //    set => SetValue(_IsCombustibleGasDetected, value);
-        //}
-
-        //public static readonly BindableProperty _ServiceUri =
-        //    BindableProperty.Create("ServiceUri", typeof(string), typeof(MainPage), "");
-
-        //public string ServiceUri
-        //{
-        //    get => (string)GetValue(_ServiceUri);
-        //    set => SetValue(_ServiceUri, value);
-        //}
-
-        //public static readonly BindableProperty _IsServiceControlEnabled =
-        //    BindableProperty.Create("IsServiceControlEnabled", typeof(bool), typeof(MainPage), true);
-
-        //public bool IsServiceControlEnabled
-        //{
-        //    get => (bool)GetValue(_IsServiceControlEnabled);
-        //    set => SetValue(_IsServiceControlEnabled, value);
-        //}
-
-        //public static readonly BindableProperty _IsGettingInfo =
-        //    BindableProperty.Create("IsGettingInfo", typeof(bool), typeof(MainPage), false);
-
-        //public bool IsGettingInfo
-        //{
-        //    get => (bool)GetValue(_IsGettingInfo);
-        //    set => SetValue(_IsGettingInfo, value);
-        //}
-
-        //public static readonly BindableProperty _ServiceInfoControlVisibility =
-        //    BindableProperty.Create("ServiceInfoControlVisibility", typeof(bool), typeof(MainPage), false);
-
-        //public bool ServiceInfoControlVisibility
-        //{
-        //    get => (bool)GetValue(_ServiceInfoControlVisibility);
-        //    set => SetValue(_ServiceInfoControlVisibility, value);
-        //}
 
         public bool IsTimerEnabled
         {
@@ -300,8 +225,44 @@ namespace LiveHome.Client.Mobile
 
         private void ShowGasWarning()
         {
-            //throw new NotImplementedException();
+            //// Instantiate the builder and set notification elements:
+            //NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            //    .SetContentTitle("Sample Notification")
+            //    .SetContentText("Hello World! This is my first notification!")
+            //    .SetSmallIcon(Resource.Drawable.ic_notification);
+
+            //// Build the notification:
+            //Notification notification = builder.Build();
+
+            //// Get the notification manager:
+            //NotificationManager notificationManager =
+            //    GetSystemService(Context.NotificationService) as NotificationManager;
+
+            //// Publish the notification:
+            //const int notificationId = 0;
+            //notificationManager.Notify(notificationId, notification);
         }
+
+        //void CreateNotificationChannel()
+        //{
+        //    if (Build.VERSION.SdkInt < BuildVersionCodes.O)
+        //    {
+        //        // Notification channels are new in API 26 (and not a part of the
+        //        // support library). There is no need to create a notification
+        //        // channel on older versions of Android.
+        //        return;
+        //    }
+
+        //    var channelName = Resources.GetString(Resource.String.channel_name);
+        //    var channelDescription = GetString(Resource.String.channel_description);
+        //    var channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationImportance.Default)
+        //    {
+        //        Description = channelDescription
+        //    };
+
+        //    var notificationManager = (NotificationManager)GetSystemService(NotificationService);
+        //    notificationManager.CreateNotificationChannel(channel);
+        //}
 
         private void ServiceUriChanged(object sender, TextChangedEventArgs e)
         {
