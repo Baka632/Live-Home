@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="NotificationText">侦测到可燃气体</string>
+  <string name="ApplicationName">Live Home</string>
+
+  <string name="channel_name">Live Home Gas Notifications</string>
+  <string name="channel_description">A warn of gas</string>
+</resources>

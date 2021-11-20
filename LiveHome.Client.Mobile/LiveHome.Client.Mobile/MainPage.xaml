@@ -30,7 +30,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="温度:" />
-                            <Span x:Name="tempLable" />
+                            <Span x:Name="tempLable" Text="&lt;尚未获取状态&gt;"/>
                             <Span Text="℃" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -39,7 +39,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="湿度:" />
-                            <Span x:Name="rhLable" />
+                            <Span x:Name="rhLable" Text="&lt;尚未获取状态&gt;"/>
                             <Span Text="%" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -48,7 +48,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="设备附近是否有可燃气体:" />
-                            <Span x:Name="gasLabel" />
+                            <Span x:Name="gasLabel" Text="&lt;尚未获取状态&gt;"/>
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
@@ -56,8 +56,8 @@
             <Label Margin="0,10,0,0">
                 <Label.FormattedText>
                     <FormattedString>
-                        <Span Text="上次检查时间" />
-                        <Span x:Name="lastCheckTimeLable" />
+                        <Span Text="上次检查时间:" />
+                        <Span x:Name="lastCheckTimeLable" Text="&lt;尚未检查&gt;"/>
                     </FormattedString>
                 </Label.FormattedText>
             </Label>

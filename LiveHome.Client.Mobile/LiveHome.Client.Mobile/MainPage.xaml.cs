@@ -6,9 +6,6 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Android;
-using Android.App;
-using Android.OS;
 using LiveHome.Client.Mobile.WebApi;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -27,6 +24,7 @@ namespace LiveHome.Client.Mobile
         private bool _isServiceControlEnabled;
         private bool _isGettingInfo;
         private bool _serviceInfoControlVisibility;
+        public static Action ShowGasWarning = null;
 
         public new event PropertyChangedEventHandler PropertyChanged;
 
@@ -172,6 +170,7 @@ namespace LiveHome.Client.Mobile
 
                 if (string.IsNullOrEmpty(ServiceUri))
                 {
+                    ShowInfoBar("没有输入服务地址", "请输入服务地址");
                     return;
                 }
 
@@ -187,7 +186,7 @@ namespace LiveHome.Client.Mobile
                 lastCheckTimeLable.Text = DateTimeOffset.Now.ToString();
                 if (IsCombustibleGasDetected)
                 {
-                    ShowGasWarning();
+                    ShowGasWarning?.Invoke();
                 }
             }
             catch (InvalidOperationException)
@@ -222,47 +221,6 @@ namespace LiveHome.Client.Mobile
         {
             await DisplayAlert(title, message, "了解");
         }
-
-        private void ShowGasWarning()
-        {
-            //// Instantiate the builder and set notification elements:
-            //NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            //    .SetContentTitle("Sample Notification")
-            //    .SetContentText("Hello World! This is my first notification!")
-            //    .SetSmallIcon(Resource.Drawable.ic_notification);
-
-            //// Build the notification:
-            //Notification notification = builder.Build();
-
-            //// Get the notification manager:
-            //NotificationManager notificationManager =
-            //    GetSystemService(Context.NotificationService) as NotificationManager;
-
-            //// Publish the notification:
-            //const int notificationId = 0;
-            //notificationManager.Notify(notificationId, notification);
-        }
-
-        //void CreateNotificationChannel()
-        //{
-        //    if (Build.VERSION.SdkInt < BuildVersionCodes.O)
-        //    {
-        //        // Notification channels are new in API 26 (and not a part of the
-        //        // support library). There is no need to create a notification
-        //        // channel on older versions of Android.
-        //        return;
-        //    }
-
-        //    var channelName = Resources.GetString(Resource.String.channel_name);
-        //    var channelDescription = GetString(Resource.String.channel_description);
-        //    var channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationImportance.Default)
-        //    {
-        //        Description = channelDescription
-        //    };
-
-        //    var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-        //    notificationManager.CreateNotificationChannel(channel);
-        //}
 
         private void ServiceUriChanged(object sender, TextChangedEventArgs e)
         {
