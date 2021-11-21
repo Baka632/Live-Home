@@ -98,7 +98,9 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\icon.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\launcher_foreground.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\app_icon.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LiveHome.Client.Mobile\LiveHome.Client.Mobile.csproj">
       <Project>{DB379BEB-9E06-4104-8721-AC6DA75EC6E7}</Project>
