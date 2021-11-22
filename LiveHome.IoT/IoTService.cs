@@ -85,5 +85,34 @@ namespace LiveHome.IoT
                 }
             });
         }
+
+        public static Task WriteTextToLCD(string text)
+        {
+            return new Task(() =>
+            {
+                //TODO: LCD!!!
+            });
+        }
+
+        public static Task LightOnOrOffLED(bool isLedLight)
+        {
+            return new Task(() =>
+            {
+                //HACK: 更改LED的Gpio pin
+                int pin = 27;
+                using (GpioController controller = new GpioController())
+                {
+                    controller.OpenPin(pin, PinMode.Output);
+                    if (isLedLight)
+                    {
+                        controller.Write(pin, PinValue.High);
+                    }
+                    else
+                    {
+                        controller.Write(pin, PinValue.Low);
+                    }
+                }
+            });
+        }
     }
 }
