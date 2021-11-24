@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveHome.Client.Mobile.Andr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveHome.Client.Mobile", "..\LiveHome.Client.Mobile\LiveHome.Client.Mobile\LiveHome.Client.Mobile.csproj", "{EAFB0951-3156-470F-825B-59C2A148FE20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveHome.Client.ConsoleDebugger", "..\LiveHome.Client.ConsoleDebugger\LiveHome.Client.ConsoleDebugger.csproj", "{CE264F6D-C371-412D-9E31-B30F244E57C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveHome.Client.ConsoleDebugger", "..\LiveHome.Client.ConsoleDebugger\LiveHome.Client.ConsoleDebugger.csproj", "{CE264F6D-C371-412D-9E31-B30F244E57C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

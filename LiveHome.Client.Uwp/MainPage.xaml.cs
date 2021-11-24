@@ -20,7 +20,9 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Threading.Tasks;
-using LiveHome.Client.Uwp.WebApi;
+using Microsoft.AspNetCore.SignalR.Client;
+using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 
 // https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x804 上介绍了“空白页”项模板
 
@@ -31,7 +33,7 @@ namespace LiveHome.Client.Uwp
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        private WebApiClient Client = new WebApiClient(null, new HttpClient());
+        private HubConnection hubConnection;
         private double _temperature;
         private double _relativeHumidity;
         private bool _isCombustibleGasDetected;
@@ -42,29 +44,19 @@ namespace LiveHome.Client.Uwp
         private InfoBarSeverity _infoBarSeverity;
         private bool _isServiceControlEnabled = true;
         private Visibility _serviceInfoControlVisibility = Visibility.Collapsed;
-        private bool _isGettingInfo;
         private DateTimeOffset _lastCheckTime;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private DispatcherTimer timer = new DispatcherTimer();
-        private bool _isTimerEnabled;
 
         public MainPage()
         {
             this.InitializeComponent();
-            timer.Interval = new TimeSpan(0, 0, 30);
-            timer.Tick += Timer_Tick;
-            _isTimerEnabled = timer.IsEnabled;
         }
 
-        private async void Timer_Tick(object sender, object e)
+        ~MainPage()
         {
-            if (IsGettingInfo)
-            {
-                return;
-            }
-            await UpdateInfo();
+            _ = hubConnection.StopAsync();
         }
 
         /// <summary>
@@ -76,23 +68,23 @@ namespace LiveHome.Client.Uwp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public bool IsTimerEnabled
-        {
-            get => _isTimerEnabled;
-            set
-            {
-                _isTimerEnabled = value;
-                if (value)
-                {
-                    timer.Start();
-                }
-                else
-                {
-                    timer.Stop();
-                }
-                OnPropertiesChanged();
-            }
-        }
+        //public bool IsTimerEnabled
+        //{
+        //    get => _isTimerEnabled;
+        //    set
+        //    {
+        //        _isTimerEnabled = value;
+        //        if (value)
+        //        {
+        //            timer.Start();
+        //        }
+        //        else
+        //        {
+        //            timer.Stop();
+        //        }
+        //        OnPropertiesChanged();
+        //    }
+        //}
 
         public DateTimeOffset LastCheckTime
         {
@@ -154,16 +146,6 @@ namespace LiveHome.Client.Uwp
             }
         }
 
-        public bool IsGettingInfo
-        {
-            get => _isGettingInfo;
-            set
-            {
-                _isGettingInfo = value;
-                OnPropertiesChanged();
-            }
-        }
-
         public Visibility ServiceInfoControlVisibility
         {
             get => _serviceInfoControlVisibility;
@@ -174,36 +156,117 @@ namespace LiveHome.Client.Uwp
             }
         }
 
-        private async void UpdateEnvInfo(object sender, RoutedEventArgs e)
+        private async void ConnectServer(object sender, RoutedEventArgs e)
         {
-            if (IsGettingInfo)
+
+            if (string.IsNullOrEmpty(ServiceUri))
             {
+                ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Warning);
                 return;
             }
-            await UpdateInfo();
+
+            IsServiceControlEnabled = false;
+            if (IsInfoBarOpen)
+            {
+                IsInfoBarOpen = false;
+            }
+
+            if (hubConnection != null)
+            {
+                await hubConnection.StopAsync();
+            }
+            hubConnection = new HubConnectionBuilder().WithUrl(ServiceUri).WithAutomaticReconnect().Build();
+            hubConnection.Closed += OnHubClosed;
+            hubConnection.Reconnecting += OnHubReconnecting;
+            hubConnection.Reconnected += OnHubReconnected;
+            hubConnection.On<string>("ReceiveEnvironmentInfo", (message) => ReceiveEnvironmentInfo(message));
+            hubConnection.On<bool>("ReceiveCombustibleGasInfo", (message) => ReceiveCombustibleGasInfo(message));
+            try
+            {
+                await hubConnection.StartAsync();
+                ServiceInfoControlVisibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
+            }
+            finally
+            {
+                IsServiceControlEnabled = true;
+            }
         }
 
-        private async Task UpdateInfo()
+        private async Task OnHubReconnected(string arg)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                IsServiceControlEnabled = true;
+                ShowInfoBar("已重新连接", null, InfoBarSeverity.Success);
+            });
+        }
+
+        private async Task OnHubReconnecting(Exception arg)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                if (IsInfoBarOpen)
+                {
+                    IsInfoBarOpen = false;
+                }
+                IsServiceControlEnabled = false;
+                if (arg is null)
+                {
+                    ShowInfoBar("正在重新连接...", null, InfoBarSeverity.Warning);
+                }
+                else
+                {
+                    ShowInfoBar("正在重新连接...", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开", InfoBarSeverity.Warning);
+                }
+            });
+        }
+
+        private async Task OnHubClosed(Exception arg)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                if (IsInfoBarOpen)
+                {
+                    IsInfoBarOpen = false;
+                }
+                IsServiceControlEnabled = true;
+                ServiceInfoControlVisibility = Visibility.Collapsed;
+                if (arg is null)
+                {
+                    ShowInfoBar("已断开连接", null, InfoBarSeverity.Warning);
+                }
+                else
+                {
+                    ShowInfoBar("已断开连接", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开", InfoBarSeverity.Error);
+                }
+            });
+        }
+
+        private async void UpdateInfo(object sender, RoutedEventArgs e)
         {
             try
             {
-                IsGettingInfo = true;
                 IsServiceControlEnabled = false;
                 if (IsInfoBarOpen)
                 {
                     IsInfoBarOpen = false;
                 }
 
-                if (string.IsNullOrEmpty(ServiceUri))
+                if (hubConnection.State == HubConnectionState.Disconnected)
                 {
-                    ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Warning);
+                    ShowInfoBar("已断开连接", "与服务器的连接已经丢失", InfoBarSeverity.Warning);
+                    IsServiceControlEnabled = true;
+                    ServiceInfoControlVisibility = Visibility.Collapsed;
                     return;
                 }
 
-                Client.BaseUrl = ServiceUri;
-
-                IsCombustibleGasDetected = await Client.CombustibleGasInfoAsync();
-                EnvironmentInfo envInfo = await Client.EnvironmentInfoAsync();
+                IsCombustibleGasDetected = await hubConnection.InvokeAsync<bool>("GetCombustibleGasInfo");
+                string envInfoString = await hubConnection.InvokeAsync<string>("GetEnvironmentInfo");
+                EnvironmentInfo envInfo = JsonSerializer.Deserialize<EnvironmentInfo>(envInfoString);
                 Temperature = envInfo.Temperature;
                 RelativeHumidity = envInfo.RelativeHumidity;
                 ServiceInfoControlVisibility = Visibility.Visible;
@@ -213,31 +276,22 @@ namespace LiveHome.Client.Uwp
                 }
                 ShowTile();
             }
-            catch (InvalidOperationException)
-            {
-                ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Error);
-                ServiceInfoControlVisibility = Visibility.Collapsed;
-            }
-            catch (ApiException ex)
-            {
-                ShowInfoBar("无效的服务器响应", $"请检查是否输入本服务的地址。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
-                ServiceInfoControlVisibility = Visibility.Collapsed;
-            }
             catch (HttpRequestException ex)
             {
                 ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
-                ServiceInfoControlVisibility = Visibility.Collapsed;
+            }
+            catch (HubException ex)
+            {
+                ShowInfoBar("服务器端出现问题", $"请稍等片刻,然后重试。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
             }
             catch (Exception ex)
             {
                 ShowInfoBar("未知错误", $"详细信息:\n{ex.Message}", InfoBarSeverity.Error);
-                ServiceInfoControlVisibility = Visibility.Collapsed;
             }
             finally
             {
                 LastCheckTime = DateTimeOffset.Now;
                 IsServiceControlEnabled = true;
-                IsGettingInfo = false;
             }
         }
 
@@ -491,6 +545,31 @@ namespace LiveHome.Client.Uwp
 
             // And send the notification to the primary tile
             TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotif);
+        }
+
+        public void ReceiveEnvironmentInfo(string message)
+        {
+            EnvironmentInfo envInfo = JsonSerializer.Deserialize<EnvironmentInfo>(message);
+            Temperature = envInfo.Temperature;
+            RelativeHumidity = envInfo.RelativeHumidity;
+            LastCheckTime = DateTimeOffset.Now;
+            ShowTile();
+        }
+
+        public void ReceiveCombustibleGasInfo(bool message)
+        {
+            IsCombustibleGasDetected = message;
+            if (IsCombustibleGasDetected)
+            {
+                ShowGasWarning();
+            }
+            LastCheckTime = DateTimeOffset.Now;
+            ShowTile();
+        }
+
+        private async void DisconnectServer(object sender, RoutedEventArgs e)
+        {
+            await hubConnection.StopAsync();
         }
     }
 }
