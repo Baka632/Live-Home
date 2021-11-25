@@ -79,7 +79,8 @@ namespace LiveHome.Server
                 }
                 return;
 #endif
-                throw new HubException($"暂时无法获取温度信息,因为服务器出现了{ex.GetType().FullName}异常");
+                //Make server happy
+                //throw new HubException($"暂时无法获取温度信息,因为服务器出现了{ex.GetType().FullName}异常");
             }
         }
 
