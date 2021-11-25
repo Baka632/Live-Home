@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Xamarin.Essentials;
 
@@ -19,6 +21,7 @@ namespace LiveHome.Client.Mobile
         private bool _isGettingInfo;
         private bool _serviceInfoControlVisibility;
         public static Action ShowGasWarning = null;
+        public Action<string, string> ShowInfoBar = null;
         public HubConnection hubConnection;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -118,6 +121,50 @@ namespace LiveHome.Client.Mobile
             }
         }
 
+        public async void GetDataNow()
+        {
+            try
+            {
+                IsServiceControlEnabled = false;
+
+                if (hubConnection.State == HubConnectionState.Disconnected)
+                {
+                    ShowInfoBar("已断开连接", "与服务器的连接已经丢失");
+                    IsServiceControlEnabled = true;
+                    ServiceInfoControlVisibility = false;
+                    return;
+                }
+
+                IsCombustibleGasDetected = await hubConnection.InvokeAsync<bool>("GetCombustibleGasInfo");
+                string envInfoString = await hubConnection.InvokeAsync<string>("GetEnvironmentInfo");
+                EnvironmentInfo envInfo = JsonSerializer.Deserialize<EnvironmentInfo>(envInfoString);
+                Temperature = envInfo.Temperature;
+                RelativeHumidity = envInfo.RelativeHumidity;
+                ServiceInfoControlVisibility = true;
+                if (IsCombustibleGasDetected)
+                {
+                    ShowGasWarning();
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}");
+            }
+            catch (HubException ex)
+            {
+                ShowInfoBar("服务器端出现问题", $"请稍等片刻,然后重试。\n详细信息:\n{ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("未知错误", $"详细信息:\n{ex.Message}");
+            }
+            finally
+            {
+                LastCheckTime = DateTimeOffset.Now;
+                IsServiceControlEnabled = true;
+            }
+        }
+
         public bool ServiceInfoControlVisibility
         {
             get => _serviceInfoControlVisibility;
@@ -133,7 +180,7 @@ namespace LiveHome.Client.Mobile
 
             if (string.IsNullOrEmpty(ServiceUri) || !Uri.TryCreate(ServiceUri, UriKind.Absolute, out _))
             {
-                //...
+                ShowInfoBar("无效的服务地址", "请检查你输入的值。");
                 return;
             }
 
@@ -156,7 +203,7 @@ namespace LiveHome.Client.Mobile
             }
             catch (Exception ex)
             {
-                //ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}", InfoBarSeverity.Error);
+                ShowInfoBar("无法与服务器建立联系", $"请检查服务是否打开,以及是否可以连接到Internet。\n详细信息:\n{ex.Message}");
             }
             finally
             {
@@ -192,7 +239,7 @@ namespace LiveHome.Client.Mobile
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 IsServiceControlEnabled = true;
-                //ShowInfoBar("已重新连接", null, InfoBarSeverity.Success);
+                ShowInfoBar("已重新连接", null);
             });
         }
 
@@ -203,11 +250,11 @@ namespace LiveHome.Client.Mobile
                 IsServiceControlEnabled = false;
                 if (arg is null)
                 {
-                    //ShowInfoBar("正在重新连接...", null, InfoBarSeverity.Warning);
+                    ShowInfoBar("正在重新连接...", null);
                 }
                 else
                 {
-                    //ShowInfoBar("正在重新连接...", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开", InfoBarSeverity.Warning);
+                    ShowInfoBar("正在重新连接...", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开");
                 }
             });
         }
@@ -220,11 +267,11 @@ namespace LiveHome.Client.Mobile
                 ServiceInfoControlVisibility = false;
                 if (arg is null)
                 {
-                    //ShowInfoBar("已断开连接", null, InfoBarSeverity.Warning);
+                    ShowInfoBar("已断开连接", null);
                 }
                 else
                 {
-                    //ShowInfoBar("已断开连接", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开", InfoBarSeverity.Error);
+                    ShowInfoBar("已断开连接", $"由于名为{arg.GetType().FullName}的错误,连接被迫断开");
                 }
             });
         }

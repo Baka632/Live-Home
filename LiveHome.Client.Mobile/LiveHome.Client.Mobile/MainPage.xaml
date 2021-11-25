@@ -26,7 +26,7 @@
                     <Label>
                         服务地址(地址需包含http://或https://前缀)
                     </Label>
-                    <Editor IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}" MinimumWidthRequest="400" Text="{Binding ServiceUri, Mode=TwoWay}" />
+                    <Editor IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}" MinimumHeightRequest="500" MinimumWidthRequest="400" Text="{Binding ServiceUri, Mode=TwoWay}" />
                 </StackLayout>
 
                 <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
@@ -64,8 +64,9 @@
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
-            <StackLayout Margin="0,10,0,0" Orientation="Horizontal">
+            <StackLayout Margin="0,10,0,0">
                 <Button
+                    Clicked="GetDataNow"
                     Margin="0,0,10,0"
                     FontSize="20"
                     IsVisible="{Binding ServiceInfoControlVisibility,Mode=OneWay}"

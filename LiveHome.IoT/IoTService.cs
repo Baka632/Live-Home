@@ -120,7 +120,7 @@ namespace LiveHome.IoT
                 I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(pin, deviceAdress));
                 Ssd1306 ssd1306 = new Ssd1306(i2CDevice);
                 ssd1306.SendCommand(new SetDisplayOn());
-                ssd1306.SendCommand(new Set());
+                
             });
         }
 
