@@ -27,6 +27,11 @@ namespace LiveHome.Server.Controllers
             try
             {
                 (double, double) values = await IoTService.GetEnvironmentInfo();
+                if (double.IsNaN(values.Item1) && double.IsNaN(values.Item2))
+                {
+                    values.Item1 = IoTService.LastSuccessEnvInfo.Item1;
+                    values.Item2 = IoTService.LastSuccessEnvInfo.Item2;
+                }
                 return JsonSerializer.Serialize(values.AsEnvironmentInfoStruct());
             }
             catch (Exception ex)

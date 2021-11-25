@@ -21,6 +21,8 @@ namespace LiveHome.IoT
         private static (double, double) lastEnvInfo;
         private static bool lastGasInfo;
 
+        public static (double, double) LastSuccessEnvInfo { get => lastEnvInfo; }
+
         public static void RecognizeQRCode()
         {
 
@@ -36,11 +38,11 @@ namespace LiveHome.IoT
             return Task.Run(() =>
             {
                 (double, double) val = GetEnvInfo();
-                if (lastEnvInfo != val)
+                if (lastEnvInfo != val && !double.IsNaN(val.Item1) && !double.IsNaN(val.Item2))
                 {
                     EnvironmentInfoChanged?.Invoke(val);
+                    lastEnvInfo = val;
                 }
-                lastEnvInfo = val;
                 return val;
             });
 
@@ -55,7 +57,7 @@ namespace LiveHome.IoT
                         //读取成功,返回值
                         double temp = temperature.DegreesCelsius;
                         double rh = humidity.Percent;
-                        Console.WriteLine($"{DateTime.Now} > [IoTService:环境信息]读取成功\n温度为:{temp:0.#}℃\n湿度为:{rh:0.#}%");
+                        Console.WriteLine($"{DateTime.Now} > [IoTService:环境信息]读取成功\n温度为:{temp}℃\n湿度为:{rh}%");
                         return (temp, rh);
                     }
                     else
