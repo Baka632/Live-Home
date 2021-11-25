@@ -26,7 +26,7 @@ namespace LiveHome.Server.Controllers
         /// </summary>
         /// <returns>当前环境信息</returns>
         [HttpGet]
-        public async Task<ActionResult<EnvironmentInfo>> GetEnvironmentInfo()
+        public ActionResult<EnvironmentInfo> GetEnvironmentInfo()
         {
             return StatusCode(410);
             //            EnvironmentInfo environmentInfo = new();
