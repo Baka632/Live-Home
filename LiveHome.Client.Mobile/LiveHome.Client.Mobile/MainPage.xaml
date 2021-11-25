@@ -1,13 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:mobile="clr-namespace:LiveHome.Client.Mobile"
-             x:Class="LiveHome.Client.Mobile.MainPage"
-             x:DataType="mobile:MainPage">
+<ContentPage
+    x:Class="LiveHome.Client.Mobile.MainPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mobile="clr-namespace:LiveHome.Client.Mobile"
+    x:DataType="mobile:MainViewModel">
     <ContentPage.Resources>
         <mobile:BoolToText x:Key="BoolToText" />
     </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <mobile:MainViewModel x:Name="ViewModel" />
+    </ContentPage.BindingContext>
+
     <StackLayout>
-        <Label Text="Live Home Client - Xamarin" HorizontalTextAlignment="Center" FontSize="30"/>
+        <Label FontSize="30" HorizontalTextAlignment="Center" Text="Live Home Client - Xamarin" />
         <StackLayout HorizontalOptions="Center">
             <StackLayout>
                 <StackLayout.Resources>
@@ -20,17 +26,14 @@
                     <Label>
                         服务地址(地址需包含http://或https://前缀)
                     </Label>
-                    <Editor
-                        MinimumHeightRequest="400"
-                        IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}"
-                        TextChanged="ServiceUriChanged" />
+                    <Editor IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}" MinimumWidthRequest="400" Text="{Binding ServiceUri, Mode=TwoWay}" />
                 </StackLayout>
 
                 <Label IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}">
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="温度:" />
-                            <Span x:Name="tempLable" Text="&lt;尚未获取状态&gt;"/>
+                            <Span x:Name="tempLable" Text="{Binding Temperature, Mode=OneWay}" />
                             <Span Text="℃" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -39,7 +42,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="湿度:" />
-                            <Span x:Name="rhLable" Text="&lt;尚未获取状态&gt;"/>
+                            <Span x:Name="rhLable" Text="{Binding RelativeHumidity, Mode=OneWay}" />
                             <Span Text="%" />
                         </FormattedString>
                     </Label.FormattedText>
@@ -48,7 +51,7 @@
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="设备附近是否有可燃气体:" />
-                            <Span x:Name="gasLabel" Text="&lt;尚未获取状态&gt;"/>
+                            <Span x:Name="gasLabel" Text="{Binding IsCombustibleGasDetected, Converter={StaticResource BoolToText}, Mode=OneWay}" />
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
@@ -57,22 +60,29 @@
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="上次检查时间:" />
-                        <Span x:Name="lastCheckTimeLable" Text="&lt;尚未检查&gt;"/>
+                        <Span x:Name="lastCheckTimeLable" Text="{Binding LastCheckTime, Mode=OneWay}" />
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
             <StackLayout Margin="0,10,0,0" Orientation="Horizontal">
                 <Button
                     Margin="0,0,10,0"
-                    Clicked="UpdateEnvInfo"
                     FontSize="20"
-                    Text="更新信息"
-                    IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}">
-                </Button>
-            </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <CheckBox HorizontalOptions="Center" VerticalOptions="Center" CheckedChanged="OnCheckedChanged" />
-                <Label HorizontalOptions="Center" VerticalOptions="Center" Text="自动更新(每半分钟更新一次)"/>
+                    IsVisible="{Binding ServiceInfoControlVisibility,Mode=OneWay}"
+                    IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}"
+                    Text="立刻获取数据" />
+                <Button
+                    Clicked="DisconnectServer"
+                    Margin="0,0,10,0"
+                    FontSize="20"
+                    IsVisible="{Binding ServiceInfoControlVisibility, Mode=OneWay}"
+                    Text="与服务器断开连接" />
+                <Button
+                    Margin="0,0,10,0"
+                    Clicked="ConnectServer"
+                    FontSize="20"
+                    IsEnabled="{Binding IsServiceControlEnabled, Mode=OneWay}"
+                    Text="与服务器连接" />
             </StackLayout>
         </StackLayout>
     </StackLayout>

@@ -22,7 +22,7 @@ namespace LiveHome.Client.Mobile.Droid
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
             CreateNotificationChannel();
-            MainPage.ShowGasWarning = () => ShowGasWarning();
+            MainViewModel.ShowGasWarning = () => ShowGasWarning();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

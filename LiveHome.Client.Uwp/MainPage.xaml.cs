@@ -159,7 +159,7 @@ namespace LiveHome.Client.Uwp
         private async void ConnectServer(object sender, RoutedEventArgs e)
         {
 
-            if (string.IsNullOrEmpty(ServiceUri))
+            if (string.IsNullOrEmpty(ServiceUri) || !Uri.TryCreate(ServiceUri, UriKind.Absolute, out _))
             {
                 ShowInfoBar("无效的服务地址", "请检查你输入的值。", InfoBarSeverity.Warning);
                 return;

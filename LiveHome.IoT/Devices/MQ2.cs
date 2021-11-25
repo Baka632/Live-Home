@@ -8,7 +8,7 @@ namespace LiveHome.IoT.Devices
     /// </summary>
     public class MQ2 : IDisposable
     {
-        private GpioController _controller;
+        private readonly GpioController _controller;
         private readonly int _outPin;
 
         /// <summary>

@@ -145,7 +145,7 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="关于" />
                         <TextBlock Margin="0,0,0,2" Text="Live Home Client" />
-                        <TextBlock Text="版本 1.0.0.0" />
+                        <TextBlock Text="版本 1.0.0.1" />
                         <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                             <Button
                                 Width="40"

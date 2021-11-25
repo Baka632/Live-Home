@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using Iot.Device.CharacterLcd;
 using Iot.Device.DHTxx;
 using Iot.Device.Pcx857x;
+using Iot.Device.Ssd13xx;
+using Iot.Device.Ssd13xx.Commands;
 using LiveHome.IoT.Devices;
+using QRCoder;
 using UnitsNet;
 
 namespace LiveHome.IoT
@@ -18,11 +21,16 @@ namespace LiveHome.IoT
         private static (double, double) lastEnvInfo;
         private static bool lastGasInfo;
 
+        public static void RecognizeQRCode()
+        {
+
+        }
+
         /// <summary>
         /// 获取当前的环境信息
         /// </summary>
         /// <returns>一个元组,第一项为温度(摄氏度),第二项为湿度(相对湿度,以百分数表示)</returns>
-        public static Task<(double, double)> GetEnvironmentInfo(int gpioPin = 26)
+        public static Task<(double, double)> GetEnvironmentInfo(int gpioPin = 4)
         {
             Console.WriteLine($"{DateTime.Now} > [IoTService:环境信息]初始化...");
             return Task.Run(() =>
@@ -104,36 +112,21 @@ namespace LiveHome.IoT
             });
         }
 
-        public static Task WriteTextToLCD(string text, int gpioPin = 114514, int line = 0)
+        public static Task WriteEnviromentInfoToLCD(int pin = 1, int deviceAdress = 0x3C)
         {
-            return new Task(() =>
+            return Task.Run(() =>
             {
                 //TODO: LCD!!!
-                I2cDevice i2c = I2cDevice.Create(new I2cConnectionSettings(1, 0x27));
-                Pcf8574 driver = new Pcf8574(i2c);
-                Lcd2004 lcd = new Lcd2004(registerSelectPin: 0,
-                                        enablePin: 2,
-                                        dataPins: new int[] { 4, 5, 6, 7 },
-                                        backlightPin: 3,
-                                        backlightBrightness: 0.1f,
-                                        readWritePin: 1,
-                                        controller: new GpioController(PinNumberingScheme.Logical, driver));
-                int currentLine = 0;
-
-                while (true)
-                {
-                    lcd.Clear();
-                    lcd.SetCursorPosition(0, currentLine);
-                    lcd.Write(text);
-                    currentLine = (currentLine == 3) ? 0 : currentLine + 1;
-                    Thread.Sleep(1000);
-                }
+                I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(pin, deviceAdress));
+                Ssd1306 ssd1306 = new Ssd1306(i2CDevice);
+                ssd1306.SendCommand(new SetDisplayOn());
+                ssd1306.SendCommand(new Set());
             });
         }
 
         public static Task LightOnOrOffLED(bool isLedLight , int gpioPin = 27)
         {
-            return new Task(() =>
+            return Task.Run(() =>
             {
                 using (GpioController controller = new GpioController())
                 {
