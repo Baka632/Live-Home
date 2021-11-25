@@ -21,7 +21,7 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <PackageCertificateThumbprint>E0C989F856BAAD89FB8A6F848F6E4C709804CEE1</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Auto</AppxBundle>
     <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
