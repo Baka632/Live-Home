@@ -37,8 +37,8 @@ namespace LiveHome.Server
 
         private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:计时器]滴答");
-            Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]正在发送可燃气体信息...");
+            Log("LiveHomeServer:计时器", "滴答");
+            Log("LiveHomeServer:计时器", "正在发送可燃气体信息...");
             try
             {
                 bool isGasDetected = await IoTService.DetectCombustibleGas();
@@ -62,7 +62,7 @@ namespace LiveHome.Server
 
             try
             {
-                Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]正在发送环境信息...");
+                Log("LiveHomeServer:计时器", "正在发送环境信息...");
                 EnvironmentInfo envInfo = (await IoTService.GetEnvironmentInfo()).AsEnvironmentInfoStruct();
                 if (hubContext != null)
                 {
@@ -136,6 +136,11 @@ namespace LiveHome.Server
                 endpoints.MapControllers();
                 endpoints.MapHub<HomeServiceHub>("/homeHub");
             });
+        }
+
+        private static void Log(string sender, string message)
+        {
+            Console.WriteLine($"\n{DateTime.Now} > [{sender}]{message}");
         }
     }
 }

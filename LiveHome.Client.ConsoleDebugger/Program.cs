@@ -9,27 +9,23 @@ namespace LiveHome.Client.ConsoleDebugger
     {
         static async Task Main(string[] args)
         {
-            while (true)
+            Console.WriteLine("等待...");
+            Console.ReadKey();
+            try
             {
-                try
-                {
-                    (double, double) info = await IoTService.GetEnvironmentInfo();
-                    if (double.IsNaN(info.Item1) && double.IsNaN(info.Item2))
-                    {
-                        Console.WriteLine($"出现异常!");
-                        _ = Console.ReadKey();
-                        break;
-                    }
-                    Console.WriteLine($"温度:{info.Item1:0.#}℃");
-                    Console.WriteLine($"湿度:{info.Item2:0.#}%");
-                    Thread.Sleep(10000);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine($"出现异常!");
-                    _ = Console.ReadKey();
-                    break;
-                }
+                await IoTService.OnOrOffBuzzer(true);
+                Console.WriteLine("等待...");
+                _ = Console.ReadKey();
+                await IoTService.OnOrOffBuzzer(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("出现问题!");
+                Console.WriteLine($"\n异常信息:{ex.Message}");
+                Console.WriteLine($"\n堆栈跟踪:{ex.StackTrace}");
+                Console.WriteLine($"\n内部异常:{ex.InnerException}");
+                Console.WriteLine("等待...");
+                _ = Console.ReadKey();
             }
         }
     }

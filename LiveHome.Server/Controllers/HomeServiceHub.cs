@@ -10,15 +10,20 @@ namespace LiveHome.Server.Controllers
 {
     public class HomeServiceHub : Hub
     {
+        static HomeServiceHub()
+        {
+            Log("HomeServiceHub:类型对象构造器", "\n「随风飘荡」\n年轻的欣特莱雅在寻找自己今后的人生道路，在年龄与阅历增长之后，她兀然发现，自己早已没了选择的权力，只能随着时代的潮流不断飘荡。");
+        }
+
         public async Task SendGasInfoToAll(bool message)
         {
-            Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]正在发送可燃气体信息...");
+            Log("HomeServiceHub:Hub", "正在发送可燃气体信息...");
             await Clients.All.SendAsync("ReceiveCombustibleGasInfo", message);
         }
 
         public async Task SendEnvironmentInfoToAll(string message)
         {
-            Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]正在发送环境信息...");
+            Log("HomeServiceHub:Hub", "正在发送环境信息...");
             await Clients.All.SendAsync("ReceiveEnvironmentInfo", message);
         }
 
@@ -62,7 +67,7 @@ namespace LiveHome.Server.Controllers
 
         public override Task OnConnectedAsync()
         {
-            Console.WriteLine($"{DateTime.Now}  > [HomeServiceHub:Hub]用户{Context.UserIdentifier}已经连接");
+            Log("HomeServiceHub:Hub", $"用户{Context.UserIdentifier}已经连接");
             return base.OnConnectedAsync();
         }
 
@@ -70,15 +75,19 @@ namespace LiveHome.Server.Controllers
         {
             if (exception is null)
             {
-                Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]用户{Context.UserIdentifier}断开了连接");
+                Log("HomeServiceHub:Hub", $"用户{Context.UserIdentifier}断开了连接");
             }
             else
             {
-                Console.WriteLine($"{DateTime.Now} > [HomeServiceHub:Hub]用户{Context.UserIdentifier}意外的断开了连接");
-                Console.WriteLine($"详细信息:{exception.Message}");
+                Log("HomeServiceHub:Hub", $"用户{Context.UserIdentifier}意外的断开了连接\n详细信息:{exception.Message}");
                 return base.OnDisconnectedAsync(null);
             }
             return base.OnDisconnectedAsync(exception);
+        }
+
+        private static void Log(string sender, string message)
+        {
+            Console.WriteLine($"\n{DateTime.Now} > [{sender}]{message}");
         }
     }
 }
