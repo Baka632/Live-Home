@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Ssd13xx;
+using Iot.Device.Ssd13xx.Commands;
+using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 using LiveHome.IoT;
 
 namespace LiveHome.Client.ConsoleDebugger
@@ -13,10 +18,13 @@ namespace LiveHome.Client.ConsoleDebugger
             Console.ReadKey();
             try
             {
-                await IoTService.OnOrOffBuzzer(true);
+                await IoTService.GetEnvironmentInfo();
+                await IoTService.DetectCombustibleGas();
+                await IoTService.WriteEnviromentInfoToLCD();
+                await IoTService.LightOnOrOffLED(true, 16);
                 Console.WriteLine("等待...");
                 _ = Console.ReadKey();
-                await IoTService.OnOrOffBuzzer(false);
+                await IoTService.LightOnOrOffLED(false, 16);
             }
             catch (Exception ex)
             {
@@ -27,6 +35,11 @@ namespace LiveHome.Client.ConsoleDebugger
                 Console.WriteLine("等待...");
                 _ = Console.ReadKey();
             }
+        }
+
+        private static void CaptureMe()
+        {
+            
         }
     }
 }

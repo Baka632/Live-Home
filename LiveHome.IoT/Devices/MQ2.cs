@@ -10,6 +10,7 @@ namespace LiveHome.IoT.Devices
     {
         private readonly GpioController _controller;
         private readonly int _outPin;
+        public event Action CombustibleGasDetected;
 
         /// <summary>
         /// 构造<see cref="MQ2"/>类的新实例
@@ -22,6 +23,17 @@ namespace LiveHome.IoT.Devices
 
             _controller = new GpioController(pinNumberingScheme);
             _controller.OpenPin(outPin, PinMode.InputPullDown);
+            _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Falling, (obj, sender) => RaiseEvent());
+        }
+
+        ~MQ2()
+        {
+            _controller.UnregisterCallbackForPinValueChangedEvent(_outPin, (obj, sender) => RaiseEvent());
+        }
+
+        private void RaiseEvent()
+        {
+            CombustibleGasDetected?.Invoke();
         }
 
         /// <summary>

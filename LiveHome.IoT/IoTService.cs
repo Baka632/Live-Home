@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.CharacterLcd;
 using Iot.Device.DHTxx;
+using Iot.Device.Media;
 using Iot.Device.Pcx857x;
 using Iot.Device.Ssd13xx;
 using Iot.Device.Ssd13xx.Commands;
@@ -13,6 +14,8 @@ using Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 using LiveHome.IoT.Devices;
 using QRCoder;
 using UnitsNet;
+using Unosquare.RaspberryIO;
+using Unosquare.RaspberryIO.Camera;
 
 namespace LiveHome.IoT
 {
@@ -21,6 +24,7 @@ namespace LiveHome.IoT
         public static event Action<(double, double)> EnvironmentInfoChanged;
         public static event Action<bool> CombustibleGasDetected;
         private static (double, double) lastEnvInfo;
+        private static bool lastGasInfo;
 
         public static (double, double) LastSuccessEnvInfo => lastEnvInfo;
         public static bool IsBuzzerOn { get; private set; }
@@ -30,9 +34,10 @@ namespace LiveHome.IoT
             Log("IoTService:类型对象构造器", "\n时代。时代在卡西米尔浓缩为了一个词，我们叫它卡瓦莱利亚基，我们也叫它大骑士领。\n新一届卡西米尔骑士特别锦标赛即将打响，我们用荣耀的模具，浇灌出了一场又一场闹剧。\n城市流光溢彩，霓虹灯征服了天空。金币叮叮作响，闪闪发亮，让人看不清那些小人物的面目。\n黎明还未升起。\n但长夜将尽。");
         }
 
-        public static void RecognizeQRCode()
+        public static async Task RecognizeQRCodeAsync()
         {
             Log("IoTService:QR Code Recognizer", "初始化...");
+            byte[] image = await CameraCapture();
         }
 
         /// <summary>
@@ -42,9 +47,9 @@ namespace LiveHome.IoT
         public static Task<(double, double)> GetEnvironmentInfo(int gpioPin = 4)
         {
             Log("IoTService:环境信息", "初始化...");
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
-                (double, double) val = GetEnvInfo();
+                (double, double) val = await GetEnvInfoAsync();
                 if (lastEnvInfo != val && !double.IsNaN(val.Item1) && !double.IsNaN(val.Item2))
                 {
                     EnvironmentInfoChanged?.Invoke(val);
@@ -53,7 +58,7 @@ namespace LiveHome.IoT
                 return val;
             });
 
-            (double, double) GetEnvInfo()
+            async Task<(double, double)> GetEnvInfoAsync()
             {
                 using (Dht11 dht11 = new Dht11(gpioPin))
                 {
@@ -65,6 +70,7 @@ namespace LiveHome.IoT
                         double temp = temperature.DegreesCelsius;
                         double rh = humidity.Percent;
                         Log("IoTService:环境信息", $"读取成功\n温度为:{temp}℃\n湿度为:{rh}%");
+                        await WriteEnviromentInfoToLCD();
                         return (temp, rh);
                     }
                     else
@@ -81,6 +87,7 @@ namespace LiveHome.IoT
                                 double temp = temperature1.DegreesCelsius;
                                 double rh = humidity1.Percent;
                                 Log("IoTService:环境信息", $"读取成功\n温度为:{temp:0.#}℃\n湿度为:{rh:0.#}%");
+                                await WriteEnviromentInfoToLCD();
                                 return (temp, rh);
                             }
                             else
@@ -112,75 +119,102 @@ namespace LiveHome.IoT
                     bool state = mq2.IsCombustibleGasDetected;
                     if (state)
                     {
-                        CombustibleGasDetected?.Invoke(state);
                         if (makeNoise)
                         {
                             await OnOrOffBuzzer(true);
                         }
+                        await LightOnOrOffLED(true, 16);
                     }
                     else
                     {
-                        if (IsBuzzerOn)
-                        {
-                            await OnOrOffBuzzer(false);
-                        }
+                        await OnOrOffBuzzer(false);
+                        await LightOnOrOffLED(false, 16);
                     }
+                    lastGasInfo = state;
+                    await WriteEnviromentInfoToLCD();
                     Log("IoTService:可燃气体检测", $"读取完成,结果为{state}。");
                     return state;
                 }
             });
         }
 
-        public static Task WriteEnviromentInfoToLCD(int pin = 1, int deviceAdress = 0x78)
+        public static Task WriteEnviromentInfoToLCD(int pin = 1, int deviceAdress = 0x3C)
         {
             return Task.Run(() =>
             {
                 Log("IoTService:LCD", "初始化...");
                 //TODO: LCD!!!
-                List<byte[]> testMessage = new List<byte[]>()
+                string message;
+                if (lastGasInfo)
                 {
-                    new byte[]
-                    {
-                        0x10,0x22,0x84,0x00,0x00,0x7F,0x49,0x49,0x49,0x49,0x7F,0x00,0x00,0x00,0x18,0x06,0x01,0x20,0x3F,0x21,0x3F,0x21,0x21,0x3F,0x21,0x3F,0x20,0x00
-                    },//温
-                    new byte[]
-                    {
-                        0x00,0x00,0xFC,0x14,0x14,0x7C,0x55,0x56,0x54,0x54,0x7C,0x14,0x14,0x00,0x20,0x18,0x07,0x20,0x21,0x13,0x15,0x09,0x09,0x15,0x13,0x21,0x20,0x00
-                    },//度
-                    new byte[]{0x00,0x00,0x00,0x60,0x60,0x00,0x00,0x00,0x00,0x00,0x0C,0x0C,0x00,0x00},//:
-                    new byte[]{0x00,0x08,0x08,0xFC,0x00,0x00,0x00,0x00,0x08,0x08,0x0F,0x08,0x08,0x00},//1
-                    new byte[]{0x00,0x08,0x08,0xFC,0x00,0x00,0x00,0x00,0x08,0x08,0x0F,0x08,0x08,0x00},//1
-                    new byte[]{0x00,0x80,0x60,0x10,0xFC,0x00,0x00,0x00,0x01,0x01,0x09,0x0F,0x09,0x00},//4
-                    new byte[]{0x00,0x7C,0x24,0x24,0x24,0xC4,0x00,0x00,0x06,0x08,0x08,0x08,0x07,0x00},//5
-                    new byte[]{0x00,0x08,0x08,0xFC,0x00,0x00,0x00,0x00,0x08,0x08,0x0F,0x08,0x08,0x00},//1
-                    new byte[]{0x00,0x80,0x60,0x10,0xFC,0x00,0x00,0x00,0x01,0x01,0x09,0x0F,0x09,0x00},//4
-                    new byte[]
-                    {
-                        0x06,0x09,0x09,0xF6,0x08,0x04,0x04,0x04,0x04,0x04,0x04,0x08,0x3C,0x00,0x00,0x00,0x00,0x07,0x08,0x10,0x10,0x10,0x10,0x10,0x10,0x08,0x04,0x00
-                    },//℃
-                };
+                    message = $"Temp:{LastSuccessEnvInfo.Item1} Humidity:{LastSuccessEnvInfo.Item2} Gas Detected!";
+                }
+                else
+                {
+                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}% No gas";
+                }
                 using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(pin, deviceAdress)))
                 {
                     using (Ssd1306 device = new Ssd1306(i2CDevice))
                     {
-                        device.SendCommand(new SetDisplayOffset(0x00));
-                        device.SendCommand(new SetDisplayStartLine(0x00));
-                        device.SendCommand(
-                            new SetMemoryAddressingMode(SetMemoryAddressingMode.AddressingMode
-                                .Horizontal));
-                        device.SendCommand(new SetNormalDisplay());
-                        device.SendCommand(new SetDisplayOn());
-                        device.SendCommand(new SetColumnAddress());
-                        device.SendCommand(new SetPageAddress(PageAddress.Page0,
-                            PageAddress.Page3));
-                        foreach (byte[] character in testMessage)
+                        InitializeSsd1306(device);
+                        ClearScreenSsd1306(device);
+                        foreach (char character in message)
                         {
-                            device.SendData(character);
+                            device.SendData(BasicFont.GetCharacterBytes(character));
                         }
-                        Log("IoTService:LCD", "Debug complete :)");
-                        Console.ReadKey();
                     }
                 }
+            });
+
+            // Display size 128x32.
+            void InitializeSsd1306(Ssd1306 device)
+            {
+                device.SendCommand(new SetDisplayOff());
+                device.SendCommand(new SetDisplayClockDivideRatioOscillatorFrequency(0x00, 0x08));
+                device.SendCommand(new SetMultiplexRatio(0x1F));
+                device.SendCommand(new SetDisplayOffset(0x00));
+                device.SendCommand(new SetDisplayStartLine(0x00));
+                device.SendCommand(new SetChargePump(true));
+                device.SendCommand(
+                    new SetMemoryAddressingMode(SetMemoryAddressingMode.AddressingMode
+                        .Horizontal));
+                device.SendCommand(new SetSegmentReMap(true));
+                device.SendCommand(new SetComOutputScanDirection(false));
+                device.SendCommand(new SetComPinsHardwareConfiguration(false, false));
+                device.SendCommand(new SetContrastControlForBank0(0x8F));
+                device.SendCommand(new SetPreChargePeriod(0x01, 0x0F));
+                device.SendCommand(
+                    new SetVcomhDeselectLevel(SetVcomhDeselectLevel.DeselectLevel.Vcc1_00));
+                device.SendCommand(new EntireDisplayOn(false));
+                device.SendCommand(new SetNormalDisplay());
+                device.SendCommand(new SetDisplayOn());
+                device.SendCommand(new SetColumnAddress());
+                device.SendCommand(new SetPageAddress(PageAddress.Page1,
+                    PageAddress.Page3));
+            }
+
+            void ClearScreenSsd1306(Ssd1306 device)
+            {
+                device.SendCommand(new SetColumnAddress());
+                device.SendCommand(new SetPageAddress(PageAddress.Page0,
+                    PageAddress.Page3));
+
+                for (int cnt = 0; cnt < 32; cnt++)
+                {
+                    byte[] data = new byte[16];
+                    device.SendData(data);
+                }
+            }
+        }
+
+        public static Task<byte[]> CameraCapture()
+        {
+            return Task.Run(async () =>
+            {
+                CameraStillSettings settings = new CameraStillSettings();
+                byte[] image = await Pi.Camera.CaptureImageAsync(settings);
+                return image;
             });
         }
 
@@ -211,7 +245,7 @@ namespace LiveHome.IoT
             });
         }
 
-        public static Task LightOnOrOffLED(bool isLedLight, int gpioPin = 27)
+        public static Task LightOnOrOffLED(bool isLedLight, int gpioPin)
         {
             return Task.Run(() =>
             {
