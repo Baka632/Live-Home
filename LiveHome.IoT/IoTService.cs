@@ -64,7 +64,7 @@ namespace LiveHome.IoT
                 {
                     Temperature temperature = dht11.Temperature;
                     RelativeHumidity humidity = dht11.Humidity;
-                    if (dht11.IsLastReadSuccessful)
+                    if (dht11.IsLastReadSuccessful && temperature.DegreesCelsius != 0d && humidity.Percent != 0)
                     {
                         //读取成功,返回值
                         double temp = temperature.DegreesCelsius;
@@ -81,7 +81,7 @@ namespace LiveHome.IoT
                         {
                             Temperature temperature1 = dht11.Temperature;
                             RelativeHumidity humidity1 = dht11.Humidity;
-                            if (dht11.IsLastReadSuccessful)
+                            if (dht11.IsLastReadSuccessful && temperature.DegreesCelsius != 0d && humidity.Percent != 0)
                             {
                                 //读取成功就返回值
                                 double temp = temperature1.DegreesCelsius;
@@ -143,15 +143,15 @@ namespace LiveHome.IoT
             return Task.Run(() =>
             {
                 Log("IoTService:LCD", "初始化...");
-                //TODO: LCD!!!
+
                 string message;
                 if (lastGasInfo)
                 {
-                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}%   Gas Detected!";
+                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC\nHumidity:{LastSuccessEnvInfo.Item2}%\nGas Detected!";
                 }
                 else
                 {
-                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}%   No gas";
+                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC\nHumidity:{LastSuccessEnvInfo.Item2}%\nNo gas";
                 }
                 using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(pin, deviceAdress)))
                 {
@@ -161,6 +161,11 @@ namespace LiveHome.IoT
                         ClearScreenSsd1306(device);
                         foreach (char character in message)
                         {
+                            if (character.Equals('\n'))
+                            {
+                                device.SendCommand(new ContinuousVerticalAndHorizontalScrollSetup(ContinuousVerticalAndHorizontalScrollSetup.VerticalHorizontalScrollType.Left, PageAddress.Page0, FrameFrequencyType.Frames128, PageAddress.Page7, 1));
+                                continue;
+                            }
                             device.SendData(BasicFont.GetCharacterBytes(character));
                         }
                     }
