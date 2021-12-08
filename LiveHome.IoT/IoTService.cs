@@ -164,6 +164,7 @@ namespace LiveHome.IoT
                             if (character.Equals('\n'))
                             {
                                 device.SendCommand(new ContinuousVerticalAndHorizontalScrollSetup(ContinuousVerticalAndHorizontalScrollSetup.VerticalHorizontalScrollType.Left, PageAddress.Page0, FrameFrequencyType.Frames128, PageAddress.Page7, 1));
+                                device.SendData(BasicFont.GetCharacterBytes(' '));
                                 continue;
                             }
                             device.SendData(BasicFont.GetCharacterBytes(character));
