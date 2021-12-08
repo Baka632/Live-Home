@@ -147,11 +147,11 @@ namespace LiveHome.IoT
                 string message;
                 if (lastGasInfo)
                 {
-                    message = $"Temp:{LastSuccessEnvInfo.Item1} Humidity:{LastSuccessEnvInfo.Item2} Gas Detected!";
+                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}%   Gas Detected!";
                 }
                 else
                 {
-                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}% No gas";
+                    message = $"Temp:{LastSuccessEnvInfo.Item1}oC Humidity:{LastSuccessEnvInfo.Item2}%   No gas";
                 }
                 using (I2cDevice i2CDevice = I2cDevice.Create(new I2cConnectionSettings(pin, deviceAdress)))
                 {
