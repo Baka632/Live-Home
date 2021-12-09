@@ -75,7 +75,7 @@ namespace LiveHome.Server
                 if (hubContext != null)
                 {
                     Random random = new Random();
-                    await hubContext.Clients.All.SendAsync("ReceiveEnvironmentInfo", JsonSerializer.Serialize(new EnvironmentInfo() { Temperature = random.Next(11451), RelativeHumidity = random.Next(100) }));
+                    await hubContext.Clients.All.SendAsync("ReceiveEnvironmentInfo", JsonSerializer.Serialize(new EnvironmentInfo() { Temperature = 22.5, RelativeHumidity = 67.2 }));
                 }
                 return;
 #endif

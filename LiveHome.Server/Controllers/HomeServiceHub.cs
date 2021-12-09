@@ -42,7 +42,7 @@ namespace LiveHome.Server.Controllers
             catch (Exception ex)
             {
 #if DEBUG
-                return JsonSerializer.Serialize(new EnvironmentInfo() { Temperature = 11451.4, RelativeHumidity = 81.0 });
+                return JsonSerializer.Serialize(new EnvironmentInfo() { Temperature = 22.5, RelativeHumidity = 42.2 });
 #endif
                 throw new HubException($"暂时无法获取温度信息,因为服务器出现了{ex.GetType().FullName}异常");
             }
